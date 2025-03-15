@@ -93,3 +93,14 @@ target_include_directories(bbs-fw PRIVATE src)
 if (${TARGET_CONTROLLER} STREQUAL "TSDZ2")
     target_link_libraries(bbs-fw stm8s)
 endif()
+
+
+# Generate hex file (SDCC)
+if (${CMAKE_C_COMPILER} STREQUAL "sdcc" OR ${TARGET_CONTROLLER} STREQUAL "BBS02" OR ${TARGET_CONTROLLER} STREQUAL "TSDZ2")
+    add_custom_command(
+        POST_BUILD
+        COMMENT Generating bbs-fw.hex
+        TARGET bbs-fw
+        COMMAND packihx bbs-fw.ihx > bbs-fw.hex
+    )
+endif()
