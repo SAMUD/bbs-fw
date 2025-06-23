@@ -56,7 +56,6 @@ hex:
 	@packihx bbs-fw.ihx > bbs-fw.hex
 
 clean:
-ifeq ($(UNAME), Linux)
 	@rm -f *.hex
 	@rm -f *.ihx
 	@rm -f *.asm
@@ -70,9 +69,6 @@ ifeq ($(UNAME), Linux)
 	@rm -f *.elf
 	@rm -f *.adb
 	@rm -f *.mem
-else
-	@cmd /C clean.bat
-endif
 	$(info Clean Finished)
 
 .PHONY = all hex clean precheck echo
