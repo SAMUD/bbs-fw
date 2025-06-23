@@ -9,10 +9,10 @@
 #include "uart.h"
 #include "system.h"
 #include "watchdog.h"
-#include "bbsx/stc15.h"
-#include "bbsx/uart_motor.h"
-#include "bbsx/timers.h"
-#include "bbsx/pins.h"
+#include "stc15.h"
+#include "uart_motor.h"
+#include "timers.h"
+#include "pins.h"
 
 #include <stdint.h>
 
@@ -280,4 +280,3 @@ INTERRUPT_USING(isr_uart2, IRQ_UART2, 3)
 		}
 	}
 }
-

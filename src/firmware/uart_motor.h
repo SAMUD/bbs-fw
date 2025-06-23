@@ -9,8 +9,8 @@
 #ifndef _BBSX_UART_MOTOR_H_
 #define _BBSX_UART_MOTOR_H_
 
-#include "bbsx/stc15.h"
-#include "bbsx/interrupt.h"
+#include "stc15.h"
+#include "interrupt.h"
 
 #include <stdint.h>
 

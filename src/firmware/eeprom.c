@@ -7,7 +7,7 @@
  */
 
 #include "eeprom.h"
-#include "bbsx/stc15.h"
+#include "stc15.h"
 
 
 #define EEPROM_NUM_SECTORS			4

@@ -15,10 +15,10 @@
 
 #define __sfr		unsigned char
 #define __sbit		bool
-#define __at(X)		
+#define __at(X)
 
 #define __xdata
-#define __data		
+#define __data
 
 #endif
 

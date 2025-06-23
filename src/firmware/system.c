@@ -9,7 +9,7 @@
 #include "system.h"
 #include "watchdog.h"
 #include "timers.h"
-#include "bbsx/stc15.h"
+#include "stc15.h"
 
 static volatile uint32_t	_ms;
 static volatile uint8_t		_x100us;
@@ -52,7 +52,7 @@ void system_delay_ms(uint16_t ms)
 	}
 }
 
-#pragma save  
+#pragma save
 #pragma nooverlay // See SDCC manual about function calls in ISR
 void system_timer0_isr()
 {

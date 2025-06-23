@@ -13,9 +13,9 @@
 #include "cfgstore.h"
 #include "eventlog.h"
 #include "fwconfig.h"
-#include "bbsx/pins.h"
-#include "bbsx/stc15.h"
-#include "bbsx/timers.h"
+#include "pins.h"
+#include "stc15.h"
+#include "timers.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -326,7 +326,7 @@ int16_t temperature_motor_x100()
 					eventlog_write_data(EVT_DATA_BBSHD_THERMISTOR, 1);
 				}
 			}
-		
+
 			if (bbshd_ptc_thermistor)
 			{
 				return thermistor_ptc_bbshd_calculate_temperature((int32_t)(R * 100.f + 0.5f));
@@ -354,7 +354,7 @@ bool shift_sensor_is_activated()
 }
 
 
-#pragma save  
+#pragma save
 #pragma nooverlay // See SDCC manual about function calls in ISR
 void sensors_timer0_isr() // runs every 100us, see timers.c
 {
@@ -379,7 +379,7 @@ void sensors_timer0_isr() // runs every 100us, see timers.c
 				// this variable counts the number of pulses since start of pedaling session.
 				pas_pulse_counter = 0;
 			}
-			
+
 			if (pas_period_counter > 0)
 			{
 				if (pas_period_counter <= pas_stop_delay_periods)
@@ -401,7 +401,7 @@ void sensors_timer0_isr() // runs every 100us, see timers.c
 			{
 				pas_period_counter++;
 			}
-			
+
 			if (pas_period_length > 0 && pas_period_counter > pas_stop_delay_periods)
 			{
 				pas_period_length = 0;
@@ -429,7 +429,7 @@ void sensors_timer0_isr() // runs every 100us, see timers.c
 			{
 				speed_ticks_period_length = 0;
 			}
-				
+
 			speed_period_counter = 0;
 		}
 		else
@@ -439,7 +439,7 @@ void sensors_timer0_isr() // runs every 100us, see timers.c
 			{
 				speed_period_counter++;
 			}
-			
+
 			if (speed_ticks_period_length > 0 && speed_period_counter > SPEED_SENSOR_TIMEOUT_MS_X10)
 			{
 				speed_ticks_period_length = 0;
@@ -448,6 +448,6 @@ void sensors_timer0_isr() // runs every 100us, see timers.c
 
 		speed_prev_state = spd;
 	}
-	
+
 }
 #pragma restore

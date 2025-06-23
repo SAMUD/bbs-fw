@@ -7,8 +7,8 @@
  */
 
 #include "adc.h"
-#include "bbsx/stc15.h"
-#include "bbsx/pins.h"
+#include "stc15.h"
+#include "pins.h"
 
 
 static uint8_t next_channel;
@@ -75,7 +75,7 @@ void adc_process()
 	{
 		no_adc_reading_counter = 0;
 
-		ADC_CONTR = (uint8_t)((1 << 7)); // Clear ADC_FLAG 
+		ADC_CONTR = (uint8_t)((1 << 7)); // Clear ADC_FLAG
 
 		switch (next_channel)
 		{

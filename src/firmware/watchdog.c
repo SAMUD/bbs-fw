@@ -7,7 +7,7 @@
  */
 
 #include "watchdog.h"
-#include "bbsx/stc15.h"
+#include "stc15.h"
 
 static bool triggered;
 

@@ -10,8 +10,8 @@
 #include "sensors.h"
 #include "system.h"
 #include "eventlog.h"
-#include "bbsx/uart_motor.h"
-#include "bbsx/pins.h"
+#include "uart_motor.h"
+#include "pins.h"
 
 #include <stdbool.h>
 
@@ -174,7 +174,7 @@ void motor_disable()
 		// when brake eventually released.
 
 		SET_PIN_LOW(PIN_MOTOR_POWER_ENABLE);
-	}	
+	}
 }
 
 uint16_t motor_status()

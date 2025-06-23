@@ -7,8 +7,8 @@
  */
 
 #include "lights.h"
-#include "bbsx/pins.h"
-#include "bbsx/stc15.h"
+#include "pins.h"
+#include "stc15.h"
 
 
 void lights_init()

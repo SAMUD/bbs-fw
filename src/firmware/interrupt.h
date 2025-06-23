@@ -9,11 +9,15 @@
 #ifndef  _INTERRUPT_H_
 #define _INTERRUPT_H_
 
-// Interrupt rouines declarations required to be included from main.c
-#if defined(BBSHD) || defined(BBS02)
-#include "bbsx/interrupt.h"
-#elif defined(TSDZ2)
-#include "tsdz2/interrupt.h"
-#endif
+#include <stc12.h>
+#include "intellisense.h"
+
+#define IRQ_TIMER0		1
+#define IRQ_UART1		4
+#define IRQ_UART2		8
+
+INTERRUPT_USING(isr_timer0, IRQ_TIMER0, 1);		// system.c
+INTERRUPT_USING(isr_uart1, IRQ_UART1, 3);		// uart.c
+INTERRUPT_USING(isr_uart2, IRQ_UART2, 3);		// uart.c
 
 #endif

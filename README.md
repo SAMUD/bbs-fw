@@ -1,4 +1,4 @@
-# BBSHD/BBS02/TSDZ2 Open Source Firmware
+# BBSHD/BBS02 Open Source Firmware
 
 ![GitHub all releases](https://img.shields.io/github/downloads/danielnilsson9/bbs-fw/total?style=for-the-badge)
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/danielnilsson9/bbs-fw?include_prereleases&style=for-the-badge)
@@ -7,8 +7,6 @@
 This firmware is intended to replace the original Bafang firmware on the BBSHD/BBS02 motor controller. Almost all functionality of original firmware has been implemented and additional features have been added.
 
 This firmware is compatible with all displays that works with the original Bafang firmware. A custom configuration tool is provided since BafangConfigTool is not compatible due to a different set of supported parameters.
-
-The firmware is also compatible with the TongSheng TSDZ2 controller but requires a custom made cable in order to interface with Bafang compatible displays.
 
 ⚠️ Warning: The firmware should NOT be flashed or configured while the eBike battery is charging!
 
@@ -63,9 +61,6 @@ V1.?     | STC15F2K60S2 |             | Supported from BBS-FW version 1.1
 V1.?     | IAP15F2K61S2 |             | Supported from BBS-FW version 1.1
 
 BBS02A - No idea, not tested, not recommended to try unless you have an already bricked controller.
-
-### TSDZ2
-Compatible with TSDZ2A/B using the STM microcontroller (which is nearly all off them).
 
 ### Displays and Controller 
 

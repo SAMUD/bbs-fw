@@ -14,7 +14,7 @@
 #include <stdint.h>
 
 #if defined(BBSHD) || defined(BBS02)
-#include "bbsx/cpu.h"
+#include "cpu.h"
 #elif defined(TSDZ2)
 #include "tsdz2/cpu.h"
 #endif
@@ -25,4 +25,3 @@ uint32_t system_ms();
 void system_delay_ms(uint16_t ms);
 
 #endif
-

@@ -1,7 +1,7 @@
 #include "timers.h"
-#include "bbsx/timers.h"
-#include "bbsx/interrupt.h"
-#include "bbsx/cpu.h"
+#include "timers.h"
+#include "interrupt.h"
+#include "cpu.h"
 
 #include <stdbool.h>
 
@@ -88,7 +88,7 @@ INTERRUPT_USING(isr_timer0, IRQ_TIMER0, 1)
 	{
 		system_timer0_isr();
 	}
-	
+
 	if (timer0_sensors_ready)
 	{
 		sensors_timer0_isr();
