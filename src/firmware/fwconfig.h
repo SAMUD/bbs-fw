@@ -22,17 +22,7 @@
 #endif
 
 
-#if defined(TSDZ2)
-	#define HAS_TORQUE_SENSOR					1
-#else
-	#define HAS_TORQUE_SENSOR					0
-#endif
-
-#if defined(BBSHD) || defined(BBS02)
-	#define HAS_SHIFT_SENSOR_SUPPORT			1
-#else
-	#define HAS_SHIFT_SENSOR_SUPPORT			0
-#endif
+#define HAS_SHIFT_SENSOR_SUPPORT			1
 
 #if defined(BBS02)
 	#define MAX_CADENCE_RPM_X10					1500
@@ -43,11 +33,7 @@
 	#define MAX_CADENCE_RPM_X10					1200
 #endif
 
-#if defined(BBS02) || defined(BBSHD)
-	#define PAS_PULSES_REVOLUTION				24
-#elif defined(TSDZ2)
-	#define PAS_PULSES_REVOLUTION				20
-#endif
+#define PAS_PULSES_REVOLUTION				24
 
  // Applied to both motor and controller tmeperature sensor
 #define MAX_TEMPERATURE							85
@@ -64,7 +50,7 @@
 // No battery percent mapping
 #define BATTERY_PERCENT_MAP_NONE				0
 // Map battery percent to provide a linear relationship on the
-// 5-bar battery indicator of the SW102 display. 
+// 5-bar battery indicator of the SW102 display.
 #define BATTERY_PERCENT_MAP_SW102				1
 
 // Select battery percent mapping
@@ -120,27 +106,11 @@
 	72, 73, 74, 76, 77, 78, 80, 81, 83, 84,		\
 	85, 87, 88, 90, 91, 93, 94, 96, 97, 99,		\
 	100
-	
+
 
 // This value is used when assist level is configured with throttle cadence
 // override flag in config tool. Default is 100%.
 #define THROTTLE_CADENCE_OVERRIDE_PERCENT		100
-
-// Lower limit for cadence rpm in power calculation
-// for torque pas assist. When cadence is below this
-// limit you will get extra power.
-//
-// power_w = torque_Nm * cadence_rpm * 0.105
-//
-// The calculated power is then multipled by a factor
-// set by the assist level to get the final power which
-// the motor will contribute.
-//
-// The value configured below is the minimum value for
-// cadence_rpm to be used in the formula above. If the
-// actual cadence is lower it will be overriden by this
-// configured value.
-#define TORQUE_POWER_LOWER_RPM_X10				300
 
 // Number of PAS sensor pulses to engage cruise mode,
 // there are 24 pulses per revolution.
@@ -160,13 +130,13 @@
 // uncomment and select option above
 // #define DISPLAY_RANGE_FIELD_DATA		DISPLAY_RANGE_FIELD_ZERO
 
-// default to temperature if temperature sensors available (BBS2/BBSHD), else power (TSDZ2)
+// default to temperature if temperature sensors available (BBS2/BBSHD), else power
 #ifndef DISPLAY_RANGE_FIELD_DATA
 	#if HAS_CONTROLLER_TEMP_SENSOR || HAS_MOTOR_TEMP_SENSOR
 	#define DISPLAY_RANGE_FIELD_DATA		DISPLAY_RANGE_FIELD_TEMPERATURE
 	#else
 	#define DISPLAY_RANGE_FIELD_DATA		DISPLAY_RANGE_FIELD_POWER
 	#endif
-#endif 
+#endif
 
 #endif

@@ -60,9 +60,6 @@ static uint16_t pretension_cutoff_speed_rpm_x10;
 static bool lights_state = false;
 
 void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent);
-#if HAS_TORQUE_SENSOR
-void apply_pas_torque(uint8_t* target_current);
-#endif
 
 void apply_pretension(uint8_t* target_current);
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent);
@@ -146,9 +143,6 @@ void app_process()
 	{
 		apply_pretension(&target_current);
 		apply_pas_cadence(&target_current, throttle_percent);
-#if HAS_TORQUE_SENSOR
-		apply_pas_torque(&target_current);
-#endif // HAS_TORQUE_SENSOR
 
 		pas_engaged = target_current > 0;
 
@@ -316,11 +310,6 @@ uint8_t app_get_status_code()
 		return STATUS_ERROR_THROTTLE;
 	}
 
-	if (!torque_sensor_ok())
-	{
-		return STATUS_ERROR_TORQUE_SENSOR;
-	}
-
 	if (temperature_motor_c > MAX_TEMPERATURE)
 	{
 		return STATUS_ERROR_MOTOR_OVER_TEMP;
@@ -371,7 +360,7 @@ void apply_pretension(uint8_t* target_current)
 
 void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent)
 {
-	if ((assist_level_data.level.flags & ASSIST_FLAG_PAS) && !(assist_level_data.level.flags & ASSIST_FLAG_PAS_TORQUE))
+	if (assist_level_data.level.flags & ASSIST_FLAG_PAS)
 	{
 		if (pas_is_pedaling_forwards() && pas_get_pulse_counter() > g_config.pas_start_delay_pulses)
 		{
@@ -411,58 +400,6 @@ void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent)
 		}
 	}
 }
-
-#if HAS_TORQUE_SENSOR
-void apply_pas_torque(uint8_t* target_current)
-{
-	if ((assist_level_data.level.flags & ASSIST_FLAG_PAS) && (assist_level_data.level.flags & ASSIST_FLAG_PAS_TORQUE))
-	{
-		if (pas_is_pedaling_forwards() && (pas_get_pulse_counter() > g_config.pas_start_delay_pulses || speed_sensor_is_moving()))
-		{
-			uint16_t torque_nm_x100 = torque_sensor_get_nm_x100();
-			uint16_t cadence_rpm_x10 = pas_get_cadence_rpm_x10();
-			if (cadence_rpm_x10 < TORQUE_POWER_LOWER_RPM_X10)
-			{
-				cadence_rpm_x10 = TORQUE_POWER_LOWER_RPM_X10;
-			}
-
-			uint16_t pedal_power_w_x10 = (uint16_t)(((uint32_t)torque_nm_x100 * cadence_rpm_x10) / 955);
-
-			// used in division below to calculate target current,
-			// clamp to 24V if no reading available (unexpected error).
-			uint16_t battery_voltage_x10 = MAX(motor_get_battery_voltage_x10(), 240);
-
-			uint16_t target_current_amp_x100 = (uint16_t)(((uint32_t)10 * pedal_power_w_x10 *
-				assist_level_data.level.torque_amplification_factor_x10) / battery_voltage_x10);
-
-			uint16_t max_current_amp_x100 = g_config.max_current_amps * 100;
-
-			// limit target to ensure no overflow in map result
-			if (target_current_amp_x100 > max_current_amp_x100)
-			{
-				target_current_amp_x100 = max_current_amp_x100;
-			}
-			uint8_t tmp_percent = (uint8_t)MAP32(target_current_amp_x100, 0, max_current_amp_x100, 0, 100);
-
-			// minimum 1 percent current if pedaling
-			if (tmp_percent < 1)
-			{
-				tmp_percent = 1;
-			}
-			// limit to maximum assist current for set level
-			else if (tmp_percent > assist_level_data.level.target_current_percent)
-			{
-				tmp_percent = assist_level_data.level.target_current_percent;
-			}
-
-			if (tmp_percent > *target_current)
-			{
-				*target_current = tmp_percent;
-			}
-		}
-	}
-}
-#endif
 
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 {
@@ -546,7 +483,7 @@ bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool p
 
 	// global throttle speed limit applies if enabled in configuration, PAS is not engaged and throttle is used
 	bool global_throttle_limit_active =
-		!pas_engaged && 
+		!pas_engaged &&
 		throttle_percent > 0 &&
 		g_config.throttle_global_spd_lim_percent > 0 &&
 		(

@@ -27,9 +27,6 @@ void speed_sensor_set_signals_per_rpm(uint8_t num_signals);
 bool speed_sensor_is_moving();
 uint16_t speed_sensor_get_rpm_x10();
 
-uint16_t torque_sensor_get_nm_x100();
-bool torque_sensor_ok();
-
 int16_t temperature_contr_x100();
 int16_t temperature_motor_x100();
 

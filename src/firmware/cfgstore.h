@@ -17,7 +17,6 @@
 #define ASSIST_FLAG_THROTTLE			0x02
 #define ASSIST_FLAG_CRUISE				0x04
 #define ASSIST_FLAG_PAS_VARIABLE		0x08	// pas mode using throttle to set power level
-#define ASSIST_FLAG_PAS_TORQUE			0x10	// pas mode using torque sensor reading
 #define ASSIST_FLAG_OVERRIDE_CADENCE	0x20	// pas option where max cadence is set to 100% when throttle overrides pas
 #define ASSIST_FLAG_OVERRIDE_SPEED		0x40	// pas option where max speed is set to 100% when throttle overrides pas
 
@@ -66,8 +65,6 @@ typedef struct
 	uint8_t max_cadence_percent;
 	uint8_t max_speed_percent;
 
-	// 10 => 1.0: 100w human power gives and additional 100w motor power
-	uint8_t torque_amplification_factor_x10;
 }  assist_level_t;
 
 // SDCC uses little endian for MCS51 and big endian for STM8...

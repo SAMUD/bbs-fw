@@ -248,16 +248,6 @@ uint16_t speed_sensor_get_rpm_x10()
 	return 0;
 }
 
-uint16_t torque_sensor_get_nm_x100()
-{
-	return 0;
-}
-
-bool torque_sensor_ok()
-{
-	return true;
-}
-
 
 int16_t temperature_contr_x100()
 {

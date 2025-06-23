@@ -28,10 +28,6 @@
 
 static const uint8_t default_current_limits[] = { 7, 10, 14, 19, 26, 36, 50, 70, 98 };
 
-#if HAS_TORQUE_SENSOR
-static const uint8_t default_torque_factors[] = { 10, 15, 23, 44, 57, 74, 88, 105, 126 };
-#endif
-
 typedef struct
 {
 	uint8_t version;
@@ -205,14 +201,7 @@ static void load_default_config()
 		g_config.assist_levels[0][i+1].max_speed_percent = 100;
 		g_config.assist_levels[0][i+1].max_throttle_current_percent = 100;
 
-#if HAS_TORQUE_SENSOR
-		g_config.assist_levels[0][i+1].flags |= ASSIST_FLAG_PAS_TORQUE;
-		g_config.assist_levels[0][i+1].target_current_percent = 100;
-		g_config.assist_levels[0][i+1].torque_amplification_factor_x10 = default_torque_factors[i];
-#else
 		g_config.assist_levels[0][i+1].target_current_percent = default_current_limits[i];
-		g_config.assist_levels[0][i+1].torque_amplification_factor_x10 = 0;
-#endif	
 	}
 }
 

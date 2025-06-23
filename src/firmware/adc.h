@@ -14,7 +14,6 @@ void adc_init();
 void adc_process();
 
 uint8_t adc_get_throttle();
-uint16_t adc_get_torque();
 
 uint16_t adc_get_temperature_contr();
 uint16_t adc_get_temperature_motor();

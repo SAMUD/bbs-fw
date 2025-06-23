@@ -132,11 +132,6 @@ uint8_t adc_get_throttle()
 	return throttle_value;
 }
 
-uint16_t adc_get_torque()
-{
-	return 0;
-}
-
 uint16_t adc_get_temperature_contr()
 {
 	return temperature_contr_value;

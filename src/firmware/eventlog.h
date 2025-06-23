@@ -64,8 +64,6 @@
 #define EVT_DATA_BBSHD_THERMISTOR			144
 #define EVT_DATA_VOLTAGE					145
 #define EVT_DATA_CALIBRATE_VOLTAGE			146
-#define EVT_DATA_TORQUE_ADC					147
-#define EVT_DATA_TORQUE_ADC_CALIBRATED		148
 
 
 void eventlog_init(bool enabled);
