@@ -868,6 +868,11 @@ static int16_t process_bafang_display_write_lights()
 
 static int16_t process_bafang_display_write_speed_limit()
 {
+	if (msg_len < 5)
+	{
+		return KEEP;
+	}
+
 	if (compute_checksum(msgbuf, 4) == msgbuf[4])
 	{
 		uint16_t value = ((msgbuf[2] << 8) | msgbuf[3]);
