@@ -173,8 +173,12 @@
 // to a certain value, use sport mode. The actual speed limit of the motor
 // remains unchanged. This is a workaround; it is not possible to
 // program the controller using an Eggrider as it doesn't understand the
-// bbs-fw protocol. In the app set the "Bafang switch mode" to "Only live data"
-// and set "Max speed OffRoad" to the value set below.
+// bbs-fw protocol. App configuration:
+// - Set "Bafang switch mode" to "Only live data"
+// - Make sure the bbs-fw wheel diameter in inches matches the Eggrider
+//   wheel circumference in mm. Formula:
+//   circumference (mm) = diameter * π * 25.4
+// - Set "Max speed OffRoad" to the value set below.
 #define SPEED_LIMIT_SPORT_SWITCH_KPH 			0 // speed in km/h. Setting to 0 disables this feature
 
 #endif
