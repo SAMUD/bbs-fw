@@ -8,21 +8,17 @@
 #ifndef _FWCONFIG_H_
 #define _FWCONFIG_H_
 
+// Device-specific configuration. States capabilities and mechanical properties of the BBS02 and BBSHD, and should not be changed.
+
 #if defined(BBSHD)
 	#define HAS_MOTOR_TEMP_SENSOR				1
 #else
 	#define HAS_MOTOR_TEMP_SENSOR				0
 #endif
 
+#define HAS_CONTROLLER_TEMP_SENSOR				1
 
-#if defined(BBSHD) || defined(BBS02)
-	#define HAS_CONTROLLER_TEMP_SENSOR			1
-#else
-	#define HAS_CONTROLLER_TEMP_SENSOR			0
-#endif
-
-
-#define HAS_SHIFT_SENSOR_SUPPORT			1
+#define HAS_SHIFT_SENSOR_SUPPORT				1
 
 #if defined(BBS02)
 	#define MAX_CADENCE_RPM_X10					1500
@@ -33,7 +29,53 @@
 	#define MAX_CADENCE_RPM_X10					1200
 #endif
 
-#define PAS_PULSES_REVOLUTION				24
+#define PAS_PULSES_REVOLUTION					24
+
+// General configuration.
+
+#define USE_FREEDOM_UNITS
+
+#define MAX_CURRENT_AMPS
+#define CURRENT_RAMP_AMPS_S
+#define CURRENT_RAMP_AMPS_S
+#define MAX_BATTERY_X100V_U16L
+#define MAX_BATTERY_X100V_U16H
+#define LOW_CUT_OFF_V
+#define MAX_SPEED_KPH
+
+#define USE_SPEED_SENSOR
+#define USE_SHIFT_SENSOR
+#define USE_PUSH_WALK
+#define USE_TEMPERATURE_SENSOR
+#define LIGHTS_MODE
+#define USE_PRETENSION
+#define PRETENSION_SPEED_CUTOFF_KPH
+
+#define WHEEL_SIZE_INCH_X10_U16L
+#define WHEEL_SIZE_INCH_X10_U16H
+#define SPEED_SENSOR_SIGNALS
+#define PAS_START_DELAY_PULSES
+#define PAS_STOP_DELAY_X100S
+#define PAS_KEEP_CURRENT_PERCENT
+#define PAS_KEEP_CURRENT_CADENCE_RPM
+
+#define THROTTLE_START_VOLTAGE_MV_U16L
+#define THROTTLE_START_VOLTAGE_MV_U16H
+#define THROTTLE_END_VOLTAGE_MV_U16L
+#define THROTTLE_END_VOLTAGE_MV_U16H
+#define THROTTLE_START_PERCENT
+#define THROTTLE_GLOBAL_SPD_LIM_OPT
+#define THROTTLE_GLOBAL_SPD_LIM_PERCENT
+
+#define SHIFT_INTERRUPT_DURATION_MS_U16L
+#define SHIFT_INTERRUPT_DURATION_MS_U16H
+#define SHIFT_INTERRUPT_CURRENT_THRESHOLD_PERCENT
+
+#define WALK_MODE_DATA_DISPLAY
+#define ASSIST_MODE_SELECT
+#define ASSIST_STARTUP_LEVEL
+
+// Unsafe configuration. Changing these makes your voided warranty even more void.
 
  // Applied to both motor and controller tmeperature sensor
 #define MAX_TEMPERATURE							85
@@ -57,11 +99,11 @@
 #define BATTERY_PERCENT_MAP						BATTERY_PERCENT_MAP_NONE
 
 // Time with no motor load until battery voltage is updated to avoid voltage sag.
-#define BATTERY_NO_LOAD_DELAY_MS		2000
+#define BATTERY_NO_LOAD_DELAY_MS				2000
 
 // Padding values for voltage range of battery.
-#define BATTERY_FULL_OFFSET_PERCENT		8
-#define BATTERY_EMPTY_OFFSET_PERCENT	8
+#define BATTERY_FULL_OFFSET_PERCENT				8
+#define BATTERY_EMPTY_OFFSET_PERCENT			8
 
 // Battery SOC percentage when current ramp down starts.
 #define LVC_RAMP_DOWN_OFFSET_PERCENT			10
