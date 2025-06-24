@@ -259,16 +259,13 @@ void app_set_lights(bool on)
 
 void app_set_speed_limit_operation_mode(uint16_t display_speed_limit_rpm)
 {
-	if (SPEED_LIMIT_SPORT_SWITCH_KPH != 0)
+	if (display_speed_limit_rpm == convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_SPORT_SWITCH_KPH))
 	{
-		if (display_speed_limit_rpm == convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_SPORT_SWITCH_KPH))
-		{
-			app_set_operation_mode(OPERATION_MODE_SPORT);
-		}
-		else
-		{
-			app_set_operation_mode(OPERATION_MODE_DEFAULT);
-		}
+		app_set_operation_mode(OPERATION_MODE_SPORT);
+	}
+	else
+	{
+		app_set_operation_mode(OPERATION_MODE_DEFAULT);
 	}
 }
 
