@@ -255,7 +255,7 @@ int16_t temperature_contr_x100()
 	const float invBeta = 1.f / 3600.f;
 	static int32_t adc_contr_x100 = 0;
 
-	if (g_config.use_temperature_sensor & TEMPERATURE_SENSOR_CONTR)
+	if (USE_TEMPERATURE_SENSOR & TEMPERATURE_SENSOR_CONTR)
 	{
 		if (adc_contr_x100 == 0)
 		{
@@ -285,7 +285,7 @@ int16_t temperature_motor_x100()
 
 	static int32_t adc_motor_x100 = 0;
 
-	if (g_config.use_temperature_sensor & TEMPERATURE_SENSOR_MOTOR)
+	if (USE_TEMPERATURE_SENSOR & TEMPERATURE_SENSOR_MOTOR)
 	{
 		bool first = false;
 		if (adc_motor_x100 == 0)

@@ -9,8 +9,7 @@
 #include "interrupt.h" // IMPORTANT: interrupt vector declarations must be included from main.c!
 #include "timers.h"
 #include "system.h"
-#include "eeprom.h"
-#include "cfgstore.h"
+#include "fwconfig.h"
 #include "eventlog.h"
 #include "app.h"
 #include "battery.h"
@@ -21,8 +20,6 @@
 #include "sensors.h"
 #include "throttle.h"
 #include "lights.h"
-#include "uart.h"
-#include "util.h"
 
 #define APP_PROCESS_INTERVAL_MS		5
 
@@ -46,23 +43,20 @@ void main(void)
 		eventlog_set_enabled(prev);
 	}
 
-	eeprom_init();
-	cfgstore_init();
-
 	adc_init();
 	sensors_init();
 
-	speed_sensor_set_signals_per_rpm(g_config.speed_sensor_signals);
-	pas_set_stop_delay((uint16_t)g_config.pas_stop_delay_x100s * 10);
+	speed_sensor_set_signals_per_rpm(SPEED_SENSOR_SIGNALS);
+	pas_set_stop_delay((uint16_t)PAS_STOP_DELAY_X100S * 10);
 
 	battery_init();
 	throttle_init(
-		EXPAND_U16(g_config.throttle_start_voltage_mv_u16h, g_config.throttle_start_voltage_mv_u16l),
-		EXPAND_U16(g_config.throttle_end_voltage_mv_u16h, g_config.throttle_end_voltage_mv_u16l)
+		THROTTLE_START_VOLTAGE_MV,
+		THROTTLE_END_VOLTAGE_MV
 	);
 
-	motor_init(g_config.max_current_amps * 1000, g_config.low_cut_off_v,
-		EXPAND_I16(g_pstate.adc_voltage_calibration_steps_x100_i16h, g_pstate.adc_voltage_calibration_steps_x100_i16l));
+	motor_init(MAX_CURRENT_AMPS * 1000, LOW_CUT_OFF_V,
+		ADC_VOLTAGE_CALIBRATION_STEPS_X100);
 
 	lights_init();
 
@@ -72,7 +66,7 @@ void main(void)
 	while (1)
 	{
 		uint32_t now = system_ms();
-	
+
 		adc_process();
 		motor_process();
 

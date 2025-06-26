@@ -38,7 +38,7 @@
 #if defined(BBSHD)
 	#define ADC_STEPS_PER_AMP_X10		69
 	#define ADC_STEPS_PER_VOLT_X100		1490 // 1460 in orginal firmware
-#elif defined(BBS02)
+#else
 	#define ADC_STEPS_PER_AMP_X10		56
 	#define ADC_STEPS_PER_VOLT_X100		1510
 #endif

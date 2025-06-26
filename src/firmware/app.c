@@ -59,6 +59,8 @@ static uint16_t pretension_cutoff_speed_rpm_x10;
 
 static bool lights_state = false;
 
+extern const assist_level_t assist_levels[2][10];
+
 void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent);
 
 void apply_pretension(uint8_t* target_current);
@@ -83,12 +85,11 @@ void app_init()
 {
 	motor_disable();
 	lights_disable();
-	lights_set(g_config.lights_mode == LIGHTS_MODE_ALWAYS_ON);
+	lights_set(LIGHTS_MODE == LIGHTS_MODE_ALWAYS_ON);
 
-	lvc_voltage_x100 = g_config.low_cut_off_v * 100u;
+	lvc_voltage_x100 = LOW_CUT_OFF_V * 100u;
 
-	uint16_t full_voltage_range_x100 =
-		EXPAND_U16(g_config.max_battery_x100v_u16h, g_config.max_battery_x100v_u16l) - lvc_voltage_x100;
+	uint16_t full_voltage_range_x100 = MAX_BATTERY_X100V - lvc_voltage_x100;
 	uint16_t padded_voltage_range_x100 = (uint16_t)(full_voltage_range_x100 *
 		(100 - BATTERY_FULL_OFFSET_PERCENT - BATTERY_EMPTY_OFFSET_PERCENT) / 100);
 
@@ -102,24 +103,26 @@ void app_init()
 	temperature_contr_c = 0;
 	temperature_motor_c = 0;
 
-	ramp_up_current_interval_ms = (g_config.max_current_amps * 10u) / g_config.current_ramp_amps_s;
+	ramp_up_current_interval_ms = (MAX_CURRENT_AMPS * 10u) / CURRENT_RAMP_AMPS_S;
 	power_blocked_until_ms = 0;
 
 	speed_limit_ramp_interval_rpm_x10 = convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH) * 10;
 
-	pretension_cutoff_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(g_config.pretension_speed_cutoff_kph) * 10;
+	pretension_cutoff_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(PRETENSION_SPEED_CUTOFF_KPH) * 10;
 
 	cruise_paused = true;
 	operation_mode = OPERATION_MODE_DEFAULT;
 
-	app_set_wheel_max_speed_rpm(convert_wheel_speed_kph_to_rpm(g_config.max_speed_kph));
-	app_set_assist_level(g_config.assist_startup_level);
+	app_set_wheel_max_speed_rpm(convert_wheel_speed_kph_to_rpm(MAX_SPEED_KPH));
+	app_set_assist_level(ASSIST_STARTUP_LEVEL);
 	reload_assist_params();
 
-	if (g_config.assist_mode_select == ASSIST_MODE_SELECT_BRAKE_BOOT && brake_is_activated())
+	#if ASSIST_MODE_SELECT == ASSIST_MODE_SELECT_BRAKE_BOOT
+	if (brake_is_activated())
 	{
 		app_set_operation_mode(OPERATION_MODE_SPORT);
 	}
+	#endif
 }
 
 void app_process()
@@ -135,7 +138,7 @@ void app_process()
 	{
 		target_current = 0;
 	}
-	else if (assist_level == ASSIST_PUSH && g_config.use_push_walk)
+	else if (assist_level == ASSIST_PUSH && USE_PUSH_WALK)
 	{
 		target_current = 10;
 	}
@@ -186,14 +189,11 @@ void app_process()
 		motor_disable();
 	}
 
-	if (g_config.lights_mode == LIGHTS_MODE_DISABLED /*|| (motor_status() & MOTOR_ERROR_LVC) */)
-	{
-		lights_disable();
-	}
-	else
-	{
-		lights_enable();
-	}
+	#if (LIGHTS_MODE == LIGHTS_MODE_DISABLED /*|| (motor_status() & MOTOR_ERROR_LVC) */)
+	lights_disable();
+	#else
+	lights_enable();
+	#endif
 }
 
 
@@ -201,7 +201,7 @@ void app_set_assist_level(uint8_t level)
 {
 	if (assist_level != level)
 	{
-		if (assist_level == ASSIST_PUSH && g_config.use_push_walk)
+		if (assist_level == ASSIST_PUSH && USE_PUSH_WALK)
 		{
 			// When releasig push walk mode pedals may have been rotating
 			// with the motor, block motor power for 2 seconds to prevent PAS
@@ -218,17 +218,17 @@ void app_set_assist_level(uint8_t level)
 void app_set_lights(bool on)
 {
 	if ( // it's ok to write ugly code if you say it's ugly...
-		(g_config.assist_mode_select == ASSIST_MODE_SELECT_LIGHTS) ||
-		(assist_level == ASSIST_0 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS0_LIGHT) ||
-		(assist_level == ASSIST_1 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS1_LIGHT) ||
-		(assist_level == ASSIST_2 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS2_LIGHT) ||
-		(assist_level == ASSIST_3 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS3_LIGHT) ||
-		(assist_level == ASSIST_4 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS4_LIGHT) ||
-		(assist_level == ASSIST_5 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS5_LIGHT) ||
-		(assist_level == ASSIST_6 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS6_LIGHT) ||
-		(assist_level == ASSIST_7 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS7_LIGHT) ||
-		(assist_level == ASSIST_8 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS8_LIGHT) ||
-		(assist_level == ASSIST_9 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS9_LIGHT)
+		(ASSIST_MODE_SELECT == ASSIST_MODE_SELECT_LIGHTS) ||
+		(assist_level == ASSIST_0 && ASSIST_MODE_SELECT == ASSIST_MODE_SELECT_PAS0_LIGHT) ||
+		(assist_level == ASSIST_1 && ASSIST_MODE_SELECT == ASSIST_MODE_SELECT_PAS1_LIGHT) ||
+		(assist_level == ASSIST_2 && ASSIST_MODE_SELECT == ASSIST_MODE_SELECT_PAS2_LIGHT) ||
+		(assist_level == ASSIST_3 && ASSIST_MODE_SELECT == ASSIST_MODE_SELECT_PAS3_LIGHT) ||
+		(assist_level == ASSIST_4 && ASSIST_MODE_SELECT == ASSIST_MODE_SELECT_PAS4_LIGHT) ||
+		(assist_level == ASSIST_5 && ASSIST_MODE_SELECT == ASSIST_MODE_SELECT_PAS5_LIGHT) ||
+		(assist_level == ASSIST_6 && ASSIST_MODE_SELECT == ASSIST_MODE_SELECT_PAS6_LIGHT) ||
+		(assist_level == ASSIST_7 && ASSIST_MODE_SELECT == ASSIST_MODE_SELECT_PAS7_LIGHT) ||
+		(assist_level == ASSIST_8 && ASSIST_MODE_SELECT == ASSIST_MODE_SELECT_PAS8_LIGHT) ||
+		(assist_level == ASSIST_9 && ASSIST_MODE_SELECT == ASSIST_MODE_SELECT_PAS9_LIGHT)
 		)
 	{
 		if (on)
@@ -242,7 +242,7 @@ void app_set_lights(bool on)
 	}
 	else
 	{
-		if (g_config.lights_mode == LIGHTS_MODE_DEFAULT && lights_state != on)
+		if (LIGHTS_MODE == LIGHTS_MODE_DEFAULT && lights_state != on)
 		{
 			lights_state = on;
 			eventlog_write_data(EVT_DATA_LIGHTS, on);
@@ -267,7 +267,7 @@ void app_set_wheel_max_speed_rpm(uint16_t value)
 	{
 		global_speed_limit_rpm = value;
 		global_throttle_speed_limit_rpm_x10 = ((int32_t)global_speed_limit_rpm *
-			g_config.throttle_global_spd_lim_percent) / 10;
+			THROTTLE_GLOBAL_SPD_LIM_PERCENT) / 10;
 
 		eventlog_write_data(EVT_DATA_WHEEL_SPEED_PPM, value);
 		reload_assist_params();
@@ -349,12 +349,14 @@ uint8_t app_get_temperature()
 
 void apply_pretension(uint8_t* target_current)
 {
+	#if USE_SPEED_SENSOR && USE_PRETENSION
 	uint16_t current_speed_rpm_x10 = speed_sensor_get_rpm_x10();
 
-	if (g_config.use_speed_sensor && g_config.use_pretension && current_speed_rpm_x10 > pretension_cutoff_speed_rpm_x10)
+	if (current_speed_rpm_x10 > pretension_cutoff_speed_rpm_x10)
 	{
 		*target_current = 1;
 	}
+	#endif
 	return;
 }
 
@@ -362,7 +364,7 @@ void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent)
 {
 	if (assist_level_data.level.flags & ASSIST_FLAG_PAS)
 	{
-		if (pas_is_pedaling_forwards() && pas_get_pulse_counter() > g_config.pas_start_delay_pulses)
+		if (pas_is_pedaling_forwards() && pas_get_pulse_counter() > PAS_START_DELAY_PULSES)
 		{
 			if (assist_level_data.level.flags & ASSIST_FLAG_PAS_VARIABLE)
 			{
@@ -380,7 +382,7 @@ void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent)
 				}
 
 				// apply "keep current" ramp
-				if (g_config.pas_keep_current_percent < 100)
+				if (PAS_KEEP_CURRENT_PERCENT < 100)
 				{
 					if (*target_current > assist_level_data.keep_current_target_percent &&
 						pas_get_cadence_rpm_x10() > assist_level_data.keep_current_ramp_start_rpm_x10)
@@ -459,7 +461,7 @@ bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 {
 	if ((assist_level_data.level.flags & ASSIST_FLAG_THROTTLE) && throttle_percent > 0 && throttle_ok())
 	{
-		uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, g_config.throttle_start_percent, assist_level_data.level.max_throttle_current_percent);
+		uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, THROTTLE_START_PERCENT, assist_level_data.level.max_throttle_current_percent);
 
 		if (current >= *target_current)
 		{
@@ -476,19 +478,18 @@ bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool p
 {
 	static bool speed_limiting = false;
 
-	if (!g_config.use_speed_sensor)
-	{
+	#if !USE_SPEED_SENSOR
 		return false;
-	}
+	#endif
 
 	// global throttle speed limit applies if enabled in configuration, PAS is not engaged and throttle is used
 	bool global_throttle_limit_active =
 		!pas_engaged &&
 		throttle_percent > 0 &&
-		g_config.throttle_global_spd_lim_percent > 0 &&
+		THROTTLE_GLOBAL_SPD_LIM_PERCENT > 0 &&
 		(
-			g_config.throttle_global_spd_lim_opt == THROTTLE_GLOBAL_SPEED_LIMIT_ENABLED ||
-			(g_config.throttle_global_spd_lim_opt == THROTTLE_GLOBAL_SPEED_LIMIT_STD_LVLS && operation_mode == OPERATION_MODE_DEFAULT)
+			THROTTLE_GLOBAL_SPD_LIM_OPT == THROTTLE_GLOBAL_SPEED_LIMIT_ENABLED ||
+			(THROTTLE_GLOBAL_SPD_LIM_OPT == THROTTLE_GLOBAL_SPEED_LIMIT_STD_LVLS && operation_mode == OPERATION_MODE_DEFAULT)
 		);
 
 	bool throttle_speed_override_active = !global_throttle_limit_active && throttle_override &&
@@ -575,7 +576,7 @@ bool apply_thermal_limit(uint8_t* target_current)
 	int16_t max_temp_x100 = MAX(temp_contr_x100, temp_motor_x100);
 	int8_t max_temp = MAX(temperature_contr_c, temperature_motor_c);
 
-	if (eventlog_is_enabled() && g_config.use_temperature_sensor && system_ms() > next_log_temp_ms)
+	if (eventlog_is_enabled() && USE_TEMPERATURE_SENSOR && system_ms() > next_log_temp_ms)
 	{
 		next_log_temp_ms = system_ms() + 10000;
 		eventlog_write_data(EVT_DATA_TEMPERATURE, (uint16_t)temperature_motor_c << 8 | temperature_contr_c);
@@ -688,10 +689,9 @@ bool apply_shift_sensor_interrupt(uint8_t* target_current)
 	static bool shift_sensor_logged = false;
 
 	// Exit immediately if shift interrupts disabled.
-	if (!g_config.use_shift_sensor)
-	{
+	#if !USE_SHIFT_SENSOR
 		return false;
-	}
+	#endif
 
 	bool active = shift_sensor_is_activated();
 	if (active)
@@ -704,10 +704,7 @@ bool apply_shift_sensor_interrupt(uint8_t* target_current)
 		}
 		if (!shift_sensor_interrupting)
 		{
-			uint16_t duration_ms = EXPAND_U16(
-				g_config.shift_interrupt_duration_ms_u16h,
-				g_config.shift_interrupt_duration_ms_u16l
-			);
+			uint16_t duration_ms = SHIFT_INTERRUPT_DURATION_MS;
 			shift_sensor_act_ms = system_ms() + duration_ms;
 			shift_sensor_interrupting = true;
 		}
@@ -736,7 +733,7 @@ bool apply_shift_sensor_interrupt(uint8_t* target_current)
 		return false;
 	}
 
-	if ((*target_current) > g_config.shift_interrupt_current_threshold_percent)
+	if ((*target_current) > SHIFT_INTERRUPT_CURRENT_THRESHOLD_PERCENT)
 	{
 		if (!shift_sensor_logged)
 		{
@@ -745,7 +742,7 @@ bool apply_shift_sensor_interrupt(uint8_t* target_current)
 			eventlog_write_data(EVT_DATA_SHIFT_SENSOR, 1);
 		}
 		// Set target current based on desired current threshold during shift.
-		*target_current = g_config.shift_interrupt_current_threshold_percent;
+		*target_current = SHIFT_INTERRUPT_CURRENT_THRESHOLD_PERCENT;
 
 		return true;
 	}
@@ -758,10 +755,9 @@ bool apply_brake(uint8_t* target_current)
 {
 	bool is_braking = brake_is_activated();
 
-	if (g_config.lights_mode == LIGHTS_MODE_BRAKE_LIGHT)
-	{
+	#if LIGHTS_MODE == LIGHTS_MODE_BRAKE_LIGHT
 		lights_set(is_braking);
-	}
+	#endif
 
 	if (is_braking)
 	{
@@ -876,14 +872,14 @@ void reload_assist_params()
 {
 	if (assist_level < ASSIST_PUSH)
 	{
-		assist_level_data.level = g_config.assist_levels[operation_mode][assist_level];
+		assist_level_data.level = assist_levels[operation_mode][assist_level];
 
 		assist_level_data.max_wheel_speed_rpm_x10 = ((int32_t)global_speed_limit_rpm * assist_level_data.level.max_speed_percent) / 10;
 
 		if (assist_level_data.level.flags & ASSIST_FLAG_PAS)
 		{
-			assist_level_data.keep_current_target_percent = (uint8_t)((uint16_t)g_config.pas_keep_current_percent * assist_level_data.level.target_current_percent / 100);
-			assist_level_data.keep_current_ramp_start_rpm_x10 = g_config.pas_keep_current_cadence_rpm * 10;
+			assist_level_data.keep_current_target_percent = (uint8_t)((uint16_t)PAS_KEEP_CURRENT_PERCENT * assist_level_data.level.target_current_percent / 100);
+			assist_level_data.keep_current_ramp_start_rpm_x10 = PAS_KEEP_CURRENT_CADENCE_RPM * 10;
 			assist_level_data.keep_current_ramp_end_rpm_x10 = (uint16_t)(((uint32_t)assist_level_data.level.max_cadence_percent * MAX_CADENCE_RPM_X10) / 100);
 		}
 
@@ -892,7 +888,7 @@ void reload_assist_params()
 	}
 	// only apply push walk params if push walk is active in config,
 	// otherwise data of previous assist level is kept.
-	else if (assist_level == ASSIST_PUSH && g_config.use_push_walk)
+	else if (assist_level == ASSIST_PUSH && USE_PUSH_WALK)
 	{
 		assist_level_data.level.flags = 0;
 		assist_level_data.level.target_current_percent = 0;
@@ -906,6 +902,6 @@ void reload_assist_params()
 
 uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph)
 {
-	float radius_mm = EXPAND_U16(g_config.wheel_size_inch_x10_u16h, g_config.wheel_size_inch_x10_u16l) * 1.27f; // g_config.wheel_size_inch_x10 / 2.f * 2.54f;
+	float radius_mm = WHEEL_SIZE_INCH_X10 * 1.27f; // wheel_size_inch_x10 / 2.f * 2.54f;
 	return (uint16_t)(25000.f / (3 * 3.14159f * radius_mm) * speed_kph);
 }

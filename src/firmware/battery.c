@@ -101,9 +101,8 @@ void battery_init()
 	motor_disabled_at_ms = 0;
 	first_reading_done = false;
 
-	uint16_t battery_min_voltage_x100v = g_config.low_cut_off_v * 100u;
-	uint16_t battery_max_voltage_x100v =
-		EXPAND_U16(g_config.max_battery_x100v_u16h, g_config.max_battery_x100v_u16l);
+	uint16_t battery_min_voltage_x100v = LOW_CUT_OFF_V * 100u;
+	uint16_t battery_max_voltage_x100v = MAX_BATTERY_X100V;
 
 	uint16_t battery_range_x100v = battery_max_voltage_x100v - battery_min_voltage_x100v;
 

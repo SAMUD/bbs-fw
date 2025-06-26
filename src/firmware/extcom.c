@@ -95,13 +95,9 @@ static int16_t try_process_bafang_write_request();
 
 static int16_t process_read_fw_version();
 static int16_t process_read_evtlog_enable();
-static int16_t process_read_config();
 static int16_t process_read_status();
 
 static int16_t process_write_evtlog_enable();
-static int16_t process_write_config();
-static int16_t process_write_reset_config();
-static int16_t process_write_adc_voltage_calibration();
 
 
 static int16_t process_bafang_display_read_status();
@@ -157,7 +153,7 @@ void extcom_process()
 			msgbuf[msg_len++] = uart_read();
 			last_recv_ms = now;
 			discard_until_ms = 0;
-		}	
+		}
 	}
 
 	if (msg_len > 0 && now - last_recv_ms > 100)
@@ -246,8 +242,6 @@ static int16_t try_process_read_request()
 		return process_read_fw_version();
 	case OPCODE_READ_EVTLOG_ENABLE:
 		return process_read_evtlog_enable();
-	case OPCODE_READ_CONFIG:
-		return process_read_config();
 	case OPCODE_READ_STATUS:
 		return process_read_status();
 	}
@@ -266,12 +260,6 @@ static int16_t try_process_write_request()
 	{
 	case OPCODE_WRITE_EVTLOG_ENABLE:
 		return process_write_evtlog_enable();
-	case OPCODE_WRITE_CONFIG:
-		return process_write_config();
-	case OPCODE_WRITE_RESET_CONFIG:
-		return process_write_reset_config();
-	case OPCODE_WRITE_ADC_VOLTAGE_CALIBRATION:
-		return process_write_adc_voltage_calibration();
 	}
 
 	return DISCARD;
@@ -331,8 +319,6 @@ static int16_t try_process_bafang_write_request()
 	return DISCARD;
 }
 
-
-
 static int16_t process_read_fw_version()
 {
 	if (msg_len < 3)
@@ -385,38 +371,6 @@ static int16_t process_read_evtlog_enable()
 	return 3;
 }
 
-static int16_t process_read_config()
-{
-	if (msg_len < 3)
-	{
-		return KEEP;
-	}
-
-	if (compute_checksum(msgbuf, 2) == msgbuf[2])
-	{
-		uint8_t checksum = 0;
-		write_uart_and_increment_checksum(REQUEST_TYPE_READ, &checksum);
-		write_uart_and_increment_checksum(OPCODE_READ_CONFIG, &checksum);
-		write_uart_and_increment_checksum(CONFIG_VERSION, &checksum);
-		write_uart_and_increment_checksum(sizeof(config_t), &checksum);
-
-		uint8_t* cfg = (uint8_t*)&g_config;
-		for (uint8_t i = 0; i < sizeof(config_t); ++i)
-		{
-			write_uart_and_increment_checksum(*(cfg + i), &checksum);
-		}
-
-		uart_write(checksum);
-	}
-	else
-	{
-		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
-		return DISCARD;
-	}
-
-	return 3;
-}
-
 static int16_t process_read_status()
 {
 	// :TODO:
@@ -447,105 +401,6 @@ static int16_t process_write_evtlog_enable()
 	}
 
 	return 4;
-}
-
-static int16_t process_write_config()
-{
-	if (msg_len < 4)
-	{
-		return KEEP;
-	}
-
-	uint8_t version = msgbuf[2];
-	uint8_t length = msgbuf[3];
-
-	if (msg_len < 4 + length + 1)
-	{
-		return KEEP;
-	}
-
-	if (compute_checksum(msgbuf, (uint8_t)(4 + sizeof(config_t))) == msgbuf[4 + sizeof(config_t)])
-	{
-		bool result = false;
-		if (version == CONFIG_VERSION && length == sizeof(config_t))
-		{
-			memcpy(&g_config, msgbuf + 4, sizeof(config_t));
-			result = cfgstore_save_config();
-		}
-
-		uint8_t checksum = 0;
-		write_uart_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
-		write_uart_and_increment_checksum(OPCODE_WRITE_CONFIG, &checksum);
-		write_uart_and_increment_checksum(result, &checksum);
-		uart_write(checksum);
-	}
-	else
-	{
-		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
-		return DISCARD;
-	}
-
-	return 4 + length + 1;
-}
-
-static int16_t process_write_reset_config()
-{
-	if (msg_len < 3)
-	{
-		return KEEP;
-	}
-
-	if (compute_checksum(msgbuf, 2) == msgbuf[2])
-	{
-
-		bool res = cfgstore_reset_config();
-
-		uint8_t checksum = 0;
-		write_uart_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
-		write_uart_and_increment_checksum(OPCODE_WRITE_RESET_CONFIG, &checksum);
-		write_uart_and_increment_checksum((uint8_t)res, &checksum);
-		uart_write(checksum);
-	}
-	else
-	{
-		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
-		return DISCARD;
-	}
-
-	return 3;
-}
-
-static int16_t process_write_adc_voltage_calibration()
-{
-	if (msg_len < 5)
-	{
-		return KEEP;
-	}
-
-	if (compute_checksum(msgbuf, 4) == msgbuf[4])
-	{
-		uint16_t actual_volt_x100 = ((uint16_t)msgbuf[2] << 8) | msgbuf[3];
-
-		int16_t calibration_offset = motor_calibrate_battery_voltage(actual_volt_x100);
-		g_pstate.adc_voltage_calibration_steps_x100_i16l = (uint8_t)(calibration_offset);
-		g_pstate.adc_voltage_calibration_steps_x100_i16h = (uint8_t)(calibration_offset >> 8);
-
-		cfgstore_save_pstate();
-
-		uint8_t checksum = 0;
-		write_uart_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
-		write_uart_and_increment_checksum(OPCODE_WRITE_ADC_VOLTAGE_CALIBRATION, &checksum);
-		write_uart_and_increment_checksum(msgbuf[2], &checksum);
-		write_uart_and_increment_checksum(msgbuf[3], &checksum);
-		uart_write(checksum);
-	}
-	else
-	{
-		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
-		return DISCARD;
-	}
-
-	return 5;
 }
 
 
@@ -600,11 +455,11 @@ static int16_t process_bafang_display_read_speed()
 
 	uint16_t speed = 0;
 
-	if (g_config.walk_mode_data_display != WALK_MODE_DATA_SPEED && app_get_assist_level() == ASSIST_PUSH)
+	if (WALK_MODE_DATA_DISPLAY != WALK_MODE_DATA_SPEED && app_get_assist_level() == ASSIST_PUSH)
 	{
 		uint16_t data = 0;
 
-		switch (g_config.walk_mode_data_display)
+		switch (WALK_MODE_DATA_DISPLAY)
 		{
 		case WALK_MODE_DATA_TEMPERATURE:
 			// Keep temperature in C, farenheit would be out of range
@@ -618,14 +473,14 @@ static int16_t process_bafang_display_read_speed()
 			break;
 		}
 
-		if (g_config.use_freedom_units)
+		if (USE_FREEDOM_UNITS)
 		{
 			// Compensate for kph -> mph conversion display will do.
 			data = (data * 161) / 100;
 		}
 
 		// T_kph -> rpm
-		speed = (uint16_t)(25000.f / (3 * 3.14159f * 1.27f * EXPAND_U16(g_config.wheel_size_inch_x10_u16h, g_config.wheel_size_inch_x10_u16l)) * data);
+		speed = (uint16_t)(25000.f / (3 * 3.14159f * 1.27f * WHEEL_SIZE_INCH_X10) * data);
 	}
 	else
 	{
@@ -667,15 +522,14 @@ static int16_t process_bafang_display_read_range()
 
 #if DISPLAY_RANGE_FIELD_DATA == DISPLAY_RANGE_FIELD_TEMPERATURE
 	value = app_get_temperature();
-	if (g_config.use_freedom_units)
-	{
+	#if USE_FREEDOM_UNITS
 		// Convert to farenheit and compensate for the km -> miles conversion the diplay will do
 		// F_miles = (C * 9/5 + 32) * 161 / 100
 		// Approximistation:
 		// F_miles = 2.9C + 50.5
 
 		value = ((290u * value) + 5050u) / 100u;
-	}
+	#endif
 #elif DISPLAY_RANGE_FIELD_DATA == DISPLAY_RANGE_FIELD_POWER
 	if (app_get_lights())
 	{
@@ -683,11 +537,11 @@ static int16_t process_bafang_display_read_range()
 	}
 	else
 	{
-		uint16_t max_current_amp_x10 = g_config.max_current_amps * 10;
+		uint16_t max_current_amp_x10 = MAX_CURRENT_AMPS * 10;
 		value = MAP32(motor_get_target_current(), 0, 100, 0, max_current_amp_x10);
 	}
 
-	if (g_config.use_freedom_units)
+	if (USE_FREEDOM_UNITS)
 	{
 		// compensate for km -> miles conversion the display will do
 		value = (value * 161u) / 100u;
@@ -878,7 +732,7 @@ static int16_t process_bafang_display_write_speed_limit()
 	{
 		 // Ignoring speed limit requested by display,
 		 // Global speed limit is configured in firmware config tool.
-		 
+
 		 uint16_t value = ((msgbuf[2] << 8) | msgbuf[3]);
 		 app_set_wheel_max_speed_rpm(value);
 	}
