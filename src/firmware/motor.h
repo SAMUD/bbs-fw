@@ -10,6 +10,7 @@
 #define _MOTOR_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #define MOTOR_ERROR_LVC				0x0800
 #define MOTOR_ERROR_HALL_SENSOR		0x2000
@@ -36,5 +37,7 @@ int16_t motor_calibrate_battery_voltage(uint16_t actual_voltage_x100);
 uint16_t motor_get_battery_lvc_x10();
 uint16_t motor_get_battery_current_x10();
 uint16_t motor_get_battery_voltage_x10();
+
+uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph);
 
 #endif

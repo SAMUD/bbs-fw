@@ -10,7 +10,6 @@
 #include "motor.h"
 #include "system.h"
 #include "util.h"
-#include "cfgstore.h"
 #include "fwconfig.h"
 
 static int16_t battery_empty_x100v;

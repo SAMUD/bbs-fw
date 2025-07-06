@@ -1,12 +1,4 @@
-/*
- * bbs-fw
- *
- * Copyright (C) Daniel Nilsson, 2022.
- *
- * Released under the GPL License, Version 3
- */
-
-#include "cfgstore.h"
+#include "constants.h"
 #include "fwconfig.h"
 
 const assist_level_t assist_levels[2][10] = {

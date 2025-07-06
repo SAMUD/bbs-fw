@@ -6,14 +6,13 @@
  * Released under the GPL License, Version 3
  */
 
+#include "eventlog.h"
+#include "fwconfig.h"
 #include "motor.h"
+#include "pins.h"
 #include "sensors.h"
 #include "system.h"
-#include "eventlog.h"
 #include "uart_motor.h"
-#include "pins.h"
-
-#include <stdbool.h>
 
 #define OPCODE_LVC				0x60
 #define OPCODE_MAX_CURRENT		0x61
@@ -701,4 +700,9 @@ static void process_com_state_machine()
 		break;
 
 	}
+}
+
+uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph)
+{
+	return (uint16_t)((speed_kph * 1000000) / (WHEEL_CIRCUMFERENCE_MM * 60));
 }

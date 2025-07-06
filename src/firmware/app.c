@@ -8,12 +8,11 @@
 
 #include "app.h"
 #include "fwconfig.h"
-#include "cfgstore.h"
+#include "constants.h"
 #include "motor.h"
 #include "sensors.h"
 #include "throttle.h"
 #include "lights.h"
-#include "uart.h"
 #include "eventlog.h"
 #include "util.h"
 #include "system.h"
@@ -898,10 +897,4 @@ void reload_assist_params()
 
 		assist_level_data.max_wheel_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(WALK_MODE_SPEED_KPH) * 10;
 	}
-}
-
-uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph)
-{
-	float radius_mm = WHEEL_SIZE_INCH_X10 * 1.27f; // wheel_size_inch_x10 / 2.f * 2.54f;
-	return (uint16_t)(25000.f / (3 * 3.14159f * radius_mm) * speed_kph);
 }

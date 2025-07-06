@@ -7,7 +7,7 @@
  */
 
 #include "extcom.h"
-#include "cfgstore.h"
+#include "constants.h"
 #include "eventlog.h"
 #include "uart.h"
 #include "system.h"
@@ -480,7 +480,7 @@ static int16_t process_bafang_display_read_speed()
 		}
 
 		// T_kph -> rpm
-		speed = (uint16_t)(25000.f / (3 * 3.14159f * 1.27f * WHEEL_SIZE_INCH_X10) * data);
+		speed = convert_wheel_speed_kph_to_rpm(data);
 	}
 	else
 	{

@@ -10,7 +10,7 @@
 #include "system.h"
 #include "adc.h"
 #include "util.h"
-#include "cfgstore.h"
+#include "constants.h"
 #include "eventlog.h"
 #include "fwconfig.h"
 #include "pins.h"

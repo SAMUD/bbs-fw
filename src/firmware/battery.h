@@ -10,6 +10,7 @@
 #define _BATTERY_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 void battery_init();
 void battery_process();
