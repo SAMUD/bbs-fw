@@ -704,5 +704,5 @@ static void process_com_state_machine()
 
 uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph)
 {
-	return (uint16_t)((speed_kph * 1000000) / (WHEEL_CIRCUMFERENCE_MM * 60));
+	return ((uint32_t)speed_kph * 100000UL) / ((uint32_t)WHEEL_CIRCUMFERENCE_MM * 6UL);
 }
