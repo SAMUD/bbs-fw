@@ -477,86 +477,83 @@ bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool p
 {
 	static bool speed_limiting = false;
 
-	#if !USE_SPEED_SENSOR
-		return false;
-	#endif
+	#if USE_SPEED_SENSOR
+		// global throttle speed limit applies if enabled in configuration, PAS is not engaged and throttle is used
+		bool global_throttle_limit_active =
+			!pas_engaged &&
+			throttle_percent > 0 &&
+			THROTTLE_GLOBAL_SPD_LIM_PERCENT > 0 &&
+			(
+				THROTTLE_GLOBAL_SPD_LIM_OPT == THROTTLE_GLOBAL_SPEED_LIMIT_ENABLED ||
+				(THROTTLE_GLOBAL_SPD_LIM_OPT == THROTTLE_GLOBAL_SPEED_LIMIT_STD_LVLS && operation_mode == OPERATION_MODE_DEFAULT)
+			);
 
-	// global throttle speed limit applies if enabled in configuration, PAS is not engaged and throttle is used
-	bool global_throttle_limit_active =
-		!pas_engaged &&
-		throttle_percent > 0 &&
-		THROTTLE_GLOBAL_SPD_LIM_PERCENT > 0 &&
-		(
-			THROTTLE_GLOBAL_SPD_LIM_OPT == THROTTLE_GLOBAL_SPEED_LIMIT_ENABLED ||
-			(THROTTLE_GLOBAL_SPD_LIM_OPT == THROTTLE_GLOBAL_SPEED_LIMIT_STD_LVLS && operation_mode == OPERATION_MODE_DEFAULT)
-		);
+		bool throttle_speed_override_active = !global_throttle_limit_active && throttle_override &&
+			(assist_level_data.level.flags & ASSIST_FLAG_PAS) &&
+			(assist_level_data.level.flags & ASSIST_FLAG_OVERRIDE_SPEED);
 
-	bool throttle_speed_override_active = !global_throttle_limit_active && throttle_override &&
-		(assist_level_data.level.flags & ASSIST_FLAG_PAS) &&
-		(assist_level_data.level.flags & ASSIST_FLAG_OVERRIDE_SPEED);
-
-	int32_t max_speed_rpm_x10;
-	if (global_throttle_limit_active)
-	{
-		// use configured global throttle override speed limit
-		max_speed_rpm_x10 = global_throttle_speed_limit_rpm_x10;
-	}
-	else if (throttle_speed_override_active)
-	{
-		// override assist level speed limit to global speed limit
-		max_speed_rpm_x10 = global_speed_limit_rpm * 10;
-	}
-	else
-	{
-		// normal operation, use configured assist level speed limit
-		max_speed_rpm_x10 = assist_level_data.max_wheel_speed_rpm_x10;
-	}
-
-	int32_t max_speed_ramp_low_rpm_x10 = max_speed_rpm_x10 - speed_limit_ramp_interval_rpm_x10;
-	int32_t max_speed_ramp_high_rpm_x10 = max_speed_rpm_x10 + speed_limit_ramp_interval_rpm_x10;
-
-	if (max_speed_rpm_x10 > 0)
-	{
-		int16_t current_speed_rpm_x10 = speed_sensor_get_rpm_x10();
-
-		if (current_speed_rpm_x10 < max_speed_ramp_low_rpm_x10)
+		int32_t max_speed_rpm_x10;
+		if (global_throttle_limit_active)
 		{
-			// no limiting
-			if (speed_limiting)
-			{
-				speed_limiting = false;
-				eventlog_write_data(EVT_DATA_SPEED_LIMITING, 0);
-			}
+			// use configured global throttle override speed limit
+			max_speed_rpm_x10 = global_throttle_speed_limit_rpm_x10;
+		}
+		else if (throttle_speed_override_active)
+		{
+			// override assist level speed limit to global speed limit
+			max_speed_rpm_x10 = global_speed_limit_rpm * 10;
 		}
 		else
 		{
-			if (!speed_limiting)
-			{
-				speed_limiting = true;
-				eventlog_write_data(EVT_DATA_SPEED_LIMITING, 1);
-			}
+			// normal operation, use configured assist level speed limit
+			max_speed_rpm_x10 = assist_level_data.max_wheel_speed_rpm_x10;
+		}
 
-			if (current_speed_rpm_x10 > max_speed_ramp_high_rpm_x10)
+		int32_t max_speed_ramp_low_rpm_x10 = max_speed_rpm_x10 - speed_limit_ramp_interval_rpm_x10;
+		int32_t max_speed_ramp_high_rpm_x10 = max_speed_rpm_x10 + speed_limit_ramp_interval_rpm_x10;
+
+		if (max_speed_rpm_x10 > 0)
+		{
+			int16_t current_speed_rpm_x10 = speed_sensor_get_rpm_x10();
+
+			if (current_speed_rpm_x10 < max_speed_ramp_low_rpm_x10)
 			{
-				if (*target_current > 1)
+				// no limiting
+				if (speed_limiting)
 				{
-					*target_current = 1;
-					return true;
+					speed_limiting = false;
+					eventlog_write_data(EVT_DATA_SPEED_LIMITING, 0);
 				}
 			}
 			else
 			{
-				// linear ramp down when approaching max speed.
-				uint8_t tmp = (uint8_t)MAP32(current_speed_rpm_x10, max_speed_ramp_low_rpm_x10, max_speed_ramp_high_rpm_x10, *target_current, 1);
-				if (*target_current > tmp)
+				if (!speed_limiting)
 				{
-					*target_current = tmp;
-					return true;
+					speed_limiting = true;
+					eventlog_write_data(EVT_DATA_SPEED_LIMITING, 1);
+				}
+
+				if (current_speed_rpm_x10 > max_speed_ramp_high_rpm_x10)
+				{
+					if (*target_current > 1)
+					{
+						*target_current = 1;
+						return true;
+					}
+				}
+				else
+				{
+					// linear ramp down when approaching max speed.
+					uint8_t tmp = (uint8_t)MAP32(current_speed_rpm_x10, max_speed_ramp_low_rpm_x10, max_speed_ramp_high_rpm_x10, *target_current, 1);
+					if (*target_current > tmp)
+					{
+						*target_current = tmp;
+						return true;
+					}
 				}
 			}
 		}
-	}
-
+	#endif
 	return false;
 }
 
