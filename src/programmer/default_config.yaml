@@ -1,0 +1,91 @@
+# This is a default configuration for the bbsxtra programmer.
+# This file is used to fill in all missing optional values from the user-provided configuration file.
+
+# The type of Bafang motor. Allowed values: BBSHD, BBS02_750W, BBS02_500W
+motor_type: BBSHD
+
+# Global max current allowed. This can't be specified higher than the maximum safe current for the motor.
+max_current: 30A
+
+# The global maximum speed allowed. Set to EU legal limits by default.
+# Note that the limit set on the display is ignored by the motor.
+global_max_speed: 25km/h
+
+# The circumference of each wheel in millimeters. Here's a chart to help you find yours, if you don't want to measure it:
+# https://www.crossroadscyclingco.com/articles/wheel-size-chart-for-bicycle-computer-settings-pg239.htm
+# This is used by the motor to calculate speed based on the speed sensor RPM, for applying speed limits.
+# Note that the wheel size set from the display is used by the display only, and is not shared with the motor.
+wheel_circumference_mm: 2136
+
+# The nominal and minimum voltage of the battery pack. The nominal voltage is used to calculate battery SOC.
+battery:
+  nominal_voltage: 48V
+  minimum_voltage: 36V # Optional. Set this if the battery's BMS's low voltage cut off triggers before the motor does
+  voltage_calibration_offset: 0V # Optional. Set this if the battery's voltage is not measured correctly
+  # Padding values for voltage range of battery.
+  soc_offset_percent:
+    full: 8
+    empty: 8
+  # How long to wait after there is no load on the battery to take the voltage. This is to avoid voltage sag.
+  no_load_delay: 2s
+  # Battery SOC percentage when current ramp down starts.
+  low_voltage_ramp_down_percent: 10
+  # Maximum allowed motor current in percent of maximum configured current (A)
+  # to still apply when 0% battery has been reached.
+  # Motor current is ramped down linearly until this value when approaching "empty".
+  low_voltage_current_percent: 20
+  # Map the state of charge percent values to force the SW102 display to show a linear scale.
+  # Allowed values: none, SW102
+  soc_map: none
+
+# Motor features
+
+# When false, the speed sensor is not used. No speed will be displayed and configuring speed limits will result in an error.
+speed_sensor:
+  enabled: true
+  # If you have more than one magnet evenly spaced on the wheel, set this to the number of magnets.
+  signals_per_revolution: 1
+
+# When false, the shift sensor is not used. This does not need to be set to false if the sensor is not connected.
+shift_sensor:
+  enabled: true
+  # How long to interrupt the motor for when shifting
+  interrupt_duration: 600ms
+  # The percentage of current to use when interrupting the motor
+  interrupt_current_percent: 10
+
+temperature_sensor:
+  # Controls which temperature is used. Allowed values: motor, controller
+  use_sensor: controller
+  # The maximum allowed temperature.
+  max_temperature: 85C
+  # The motor will start to ramp down at (max_temperature - max_temperature_ramp_down_start)
+  max_temperature_ramp_down_start: 5C
+  # Maximum allowed motor current in percent of maximum configured current (A)
+  # to still apply when maximum temperature has been reached.
+  # Motor current is ramped down linearly until this value when approaching
+  # max temperature.
+  max_temperature_low_current_percent: 20
+
+walk_mode:
+  enabled: true
+  speed: 4km/h
+
+pretension:
+  enabled: true
+  speed_cutoff: 16km/h
+
+lights:
+  # Some motors are sold without the wires to connect lights. If so, disable this functionality.
+  # Note that lights can pull a max of 0.5A @ 6V, which is not much.
+  enabled: true
+  # Light mode. Allowed values: default, always_on, brake_light
+  mode: default
+
+pedal_assist_levels:
+  standard:
+    levels:
+      - max_cadence_percent: 100
+        max_speed_percent: 0
+        target_current_percent: 0
+        max_throttle_current_percent: 0
