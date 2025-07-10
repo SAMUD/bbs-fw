@@ -724,17 +724,18 @@ bool apply_low_voltage_limit(uint8_t* target_current)
 		}
 
 		// Ramp down power until LVC_LOW_CURRENT_PERCENT when approaching LVC
-		uint8_t tmp = (uint8_t)MAP32(
+		int8_t tmp = (int8_t)MAP32(
 			voltage_x100,						// value
 			lvc_ramp_down_end_voltage_x100,		// in_min
 			lvc_ramp_down_start_voltage_x100,	// in_max
 			LVC_LOW_CURRENT_PERCENT,			// out_min
 			100									// out_max
 		);
+		uint8_t tmp2 = (uint8_t)CLAMP(tmp, 0, 100);
 
-		if (*target_current > tmp)
+		if (*target_current > tmp2)
 		{
-			*target_current = tmp;
+			*target_current = tmp2;
 			return true;
 		}
 	}
