@@ -45,6 +45,11 @@ static uint16_t lvc_voltage_x100;
 static uint16_t lvc_ramp_down_start_voltage_x100;
 static uint16_t lvc_ramp_down_end_voltage_x100;
 
+static uint16_t full_voltage_range_x100;
+static uint16_t padded_voltage_range_x100;
+static uint16_t low_voltage_pad_x100;
+static uint16_t high_voltage_pad_x100;
+
 static assist_level_data_t assist_level_data;
 static uint16_t speed_limit_ramp_interval_rpm_x10;
 
@@ -90,15 +95,16 @@ void app_init()
 
 	lvc_voltage_x100 = g_config.low_cut_off_v * 100u;
 
-	uint16_t full_voltage_range_x100 =
-		EXPAND_U16(g_config.max_battery_x100v_u16h, g_config.max_battery_x100v_u16l) - lvc_voltage_x100;
-	uint16_t padded_voltage_range_x100 = (uint16_t)(full_voltage_range_x100 *
-		(100 - BATTERY_FULL_OFFSET_PERCENT - BATTERY_EMPTY_OFFSET_PERCENT) / 100);
+	full_voltage_range_x100 = EXPAND_U16(g_config.max_battery_x100v_u16h, g_config.max_battery_x100v_u16l) - lvc_voltage_x100;
+	low_voltage_pad_x100 = full_voltage_range_x100 * BATTERY_EMPTY_OFFSET_PERCENT / 100;
+	high_voltage_pad_x100 = full_voltage_range_x100 * BATTERY_FULL_OFFSET_PERCENT / 100;
+	padded_voltage_range_x100 = full_voltage_range_x100 - low_voltage_pad_x100 - high_voltage_pad_x100;
 
-	lvc_ramp_down_end_voltage_x100 = (uint16_t)(lvc_voltage_x100 +
-		(full_voltage_range_x100 * BATTERY_EMPTY_OFFSET_PERCENT / 100));
-	lvc_ramp_down_start_voltage_x100 = (uint16_t)(lvc_ramp_down_end_voltage_x100 +
-		((padded_voltage_range_x100 * LVC_RAMP_DOWN_OFFSET_PERCENT) / 100));
+	// The LVC ramp down end is at 0% battery, which is LVC + the low padding value.
+	lvc_ramp_down_end_voltage_x100 = (uint16_t)(lvc_voltage_x100 + (full_voltage_range_x100 * BATTERY_EMPTY_OFFSET_PERCENT / 100));
+
+	// The LVC ramp down starts at 10% battery, using the padded range.
+	lvc_ramp_down_start_voltage_x100 = (uint16_t)(lvc_ramp_down_end_voltage_x100 + ((padded_voltage_range_x100 * LVC_RAMP_DOWN_OFFSET_PERCENT) / 100));
 
 	global_speed_limit_rpm = 0;
 	global_throttle_speed_limit_rpm_x10 = 0;
