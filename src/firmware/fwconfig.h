@@ -178,7 +178,7 @@
 
 // Unsafe configuration. Changing these makes your voided warranty even more void.
 
- // Applied to both motor and controller tmeperature sensor
+// Applied to both motor and controller temperature sensor
 #define MAX_TEMPERATURE							85
 
 // Current ramp down starts at MAX_TEMPERATURE - 5.
