@@ -4,4 +4,14 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pint>=0.24.4",
+    "pydantic>=2.11.7",
+    "pydantic-pint>=0.2",
+    "pydantic-yaml>=1.5.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.2",
+]

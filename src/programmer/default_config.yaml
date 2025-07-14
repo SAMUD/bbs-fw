@@ -24,8 +24,8 @@ battery:
   voltage_calibration_offset: 0V # Optional. Set this if the battery's voltage is not measured correctly
   # Padding values for voltage range of battery.
   soc_offset_percent:
-    full: 8
     empty: 8
+    full: 8
   # How long to wait after there is no load on the battery to take the voltage. This is to avoid voltage sag.
   no_load_delay: 2s
   # Battery SOC percentage when current ramp down starts.
@@ -85,7 +85,20 @@ lights:
 pedal_assist_levels:
   standard:
     levels:
-      - max_cadence_percent: 100
+      - flags: ASSIST_FLAG_PAS | ASSIST_FLAG_THROTTLE
+        max_cadence_percent: 100
         max_speed_percent: 0
-        target_current_percent: 0
         max_throttle_current_percent: 0
+        target_current_percent: 0
+      - flags: ASSIST_FLAG_PAS | ASSIST_FLAG_THROTTLE
+        max_cadence_percent: 100
+        max_speed_percent: 0
+        max_throttle_current_percent: 0
+        target_current_percent: 0
+  sport:
+    levels:
+      - flags: ASSIST_FLAG_PAS | ASSIST_FLAG_THROTTLE
+        max_cadence_percent: 100
+        max_speed_percent: 0
+        max_throttle_current_percent: 0
+        target_current_percent: 0
