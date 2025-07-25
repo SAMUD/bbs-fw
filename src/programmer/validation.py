@@ -2,7 +2,9 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 from pydantic_pint import PydanticPintQuantity
-from pint import Quantity
+from pint import Quantity, UnitRegistry
+
+ureg = UnitRegistry(autoconvert_offset_to_baseunit = True)
 
 class BatterySocOffsetPercent(BaseModel):
     empty: int = Field(ge=0, le=100, default=8)
@@ -30,8 +32,8 @@ class ShiftSensor(BaseModel):
 class TemperatureSensor(BaseModel):
     enabled: bool = Field(default=True)
     use_sensor: Literal["controller", "motor"]
-    max_temperature: Annotated[Quantity, PydanticPintQuantity("degree_celsius"), Field(default="85C")]
-    max_temperature_ramp_down_start: Annotated[Quantity, PydanticPintQuantity("degree_celsius"), Field(default="5C")]
+    max_temperature: Annotated[Quantity, PydanticPintQuantity("degree_Celsius", ureg=ureg), Field(default="85 degC")]
+    max_temperature_ramp_down_start: Annotated[Quantity, PydanticPintQuantity("degree_Celsius", ureg=ureg), Field(default="5 degC")]
     max_temperature_low_current_percent: int = Field(ge=0, le=100, default=20)
 
 class WalkMode(BaseModel):
@@ -64,7 +66,7 @@ class Config(BaseModel):
     motor_type: Literal["BBSHD", "BBS02_750W", "BBS02_500W"]
     max_current: Annotated[Quantity, PydanticPintQuantity("ampere")]
     global_max_speed: Annotated[Quantity, PydanticPintQuantity("km/h")]
-    wheel_circumference_mm: Annotated[Quantity, PydanticPintQuantity("millimeter")]
+    wheel_circumference: Annotated[Quantity, PydanticPintQuantity("millimeter")]
     battery: Battery
     speed_sensor: SpeedSensor
     shift_sensor: ShiftSensor
