@@ -1,14 +1,14 @@
-import yaml
 import argparse
-from pint import UnitRegistry
+from pydantic_yaml import parse_yaml_raw_as
+from validation import Config
+from write_header import HeaderFile
 
-def read_yaml(file_path):
+def parse_yaml(file_path):
     with open(file_path, "r") as file:
-        return yaml.safe_load(file)
+        return parse_yaml_raw_as(Config, file)
 
-
-def format_header_define(key, value):
-    return f"#define {key} {value}"
+def write_header_line():
+	pass
 
 def recurse_config_key(config, begin_key=""):
 	for key, value in config.items():
@@ -28,15 +28,17 @@ def main():
     )
     parser.add_argument("filename", help="Path to the yaml configuration file")
     args = parser.parse_args()
-    config = read_yaml(args.filename)
-    for level_type, levels in config["pedal_assist_levels"].items():
+    config = parse_yaml(args.filename)
+    config_object = config.model_dump()
+    header_file = HeaderFile("fwconfig.h")
+    for level_type, levels in config_object["pedal_assist_levels"].items():
         for index, level in enumerate(levels["levels"]):
             # Header example ASSIST_LEVEL_STANDARD_0_FLAGS
             for level_key, level_value in level.items():
-                print(format_header_define(f"ASSIST_LEVEL_{level_type}_{index}_{level_key}".upper(), level_value))
-            print()
-    del config["pedal_assist_levels"]
-    recurse_config_key(config)
+                header_file.write_define(f"ASSIST_LEVEL_{level_type}_{index}_{level_key}".upper(), level_value)
+    del config_object["pedal_assist_levels"]
+    header_file.close_file()
+    # recurse_config_key(config)
 
 
 if __name__ == "__main__":

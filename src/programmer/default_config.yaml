@@ -15,7 +15,7 @@ global_max_speed: 25km/h
 # https://www.crossroadscyclingco.com/articles/wheel-size-chart-for-bicycle-computer-settings-pg239.htm
 # This is used by the motor to calculate speed based on the speed sensor RPM, for applying speed limits.
 # Note that the wheel size set from the display is used by the display only, and is not shared with the motor.
-wheel_circumference_mm: 2136
+wheel_circumference: 2136mm
 
 # The nominal and minimum voltage of the battery pack. The nominal voltage is used to calculate battery SOC.
 battery:
@@ -58,9 +58,9 @@ temperature_sensor:
   # Controls which temperature is used. Allowed values: motor, controller
   use_sensor: controller
   # The maximum allowed temperature.
-  max_temperature: 85C
+  max_temperature: 85 degC
   # The motor will start to ramp down at (max_temperature - max_temperature_ramp_down_start)
-  max_temperature_ramp_down_start: 5C
+  max_temperature_ramp_down_start: 5 degC
   # Maximum allowed motor current in percent of maximum configured current (A)
   # to still apply when maximum temperature has been reached.
   # Motor current is ramped down linearly until this value when approaching
