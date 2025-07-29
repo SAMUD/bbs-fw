@@ -38,6 +38,6 @@ uint16_t motor_get_battery_lvc_x10();
 uint16_t motor_get_battery_current_x10();
 uint16_t motor_get_battery_voltage_x10();
 
-uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph);
+uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph, bool display_scaled);
 
 #endif

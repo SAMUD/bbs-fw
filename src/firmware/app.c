@@ -78,7 +78,7 @@ void block_power_for(uint16_t ms);
 
 void reload_assist_params();
 
-uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph);
+uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph, bool display_scaled);
 
 void app_init()
 {
@@ -105,14 +105,14 @@ void app_init()
 	ramp_up_current_interval_ms = (MAX_CURRENT_AMPS * 10u) / CURRENT_RAMP_AMPS_S;
 	power_blocked_until_ms = 0;
 
-	speed_limit_ramp_interval_rpm_x10 = convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH) * 10;
+	speed_limit_ramp_interval_rpm_x10 = convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH, false) * 10;
 
-	pretension_cutoff_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(PRETENSION_SPEED_CUTOFF_KPH) * 10;
+	pretension_cutoff_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(PRETENSION_SPEED_CUTOFF_KPH, false) * 10;
 
 	cruise_paused = true;
 	operation_mode = OPERATION_MODE_DEFAULT;
 
-	app_set_wheel_max_speed_rpm(convert_wheel_speed_kph_to_rpm(MAX_SPEED_KPH));
+	app_set_wheel_max_speed_rpm(convert_wheel_speed_kph_to_rpm(MAX_SPEED_KPH, false));
 	app_set_assist_level(ASSIST_STARTUP_LEVEL);
 	reload_assist_params();
 
@@ -252,7 +252,7 @@ void app_set_lights(bool on)
 
 void app_set_speed_limit_operation_mode(uint16_t display_speed_limit_rpm)
 {
-	if (display_speed_limit_rpm == convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_SPORT_SWITCH_KPH))
+	if (display_speed_limit_rpm == convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_SPORT_SWITCH_KPH, true))
 	{
 		app_set_operation_mode(OPERATION_MODE_SPORT);
 	}
@@ -904,6 +904,6 @@ void reload_assist_params()
 		assist_level_data.level.max_cadence_percent = 15;
 		assist_level_data.level.max_throttle_current_percent = 0;
 
-		assist_level_data.max_wheel_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(WALK_MODE_SPEED_KPH) * 10;
+		assist_level_data.max_wheel_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(WALK_MODE_SPEED_KPH, false) * 10;
 	}
 }
