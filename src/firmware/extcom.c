@@ -727,21 +727,27 @@ static int16_t process_bafang_display_write_speed_limit()
 		return KEEP;
 	}
 
-	/*
-	if (compute_checksum(msgbuf, 4) == msgbuf[4])
-	{
-		 // Ignoring speed limit requested by display,
-		 // Global speed limit is configured in firmware config tool.
+	#if (SPEED_LIMIT_SPORT_SWITCH_KPH > 0)
+		if (compute_checksum(msgbuf, 4) == msgbuf[4])
+		{
+			uint16_t value = ((msgbuf[2] << 8) | msgbuf[3]);
 
-		 uint16_t value = ((msgbuf[2] << 8) | msgbuf[3]);
-		 app_set_wheel_max_speed_rpm(value);
-	}
-	else
-	{
-		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
-		return DISCARD;
-	}
-	*/
+			// Enable sport mode if the display sets the speed limit to
+			// the specified value
+
+			app_set_speed_limit_operation_mode(value);
+
+
+			// Ignoring speed limit requested by display,
+			// Global speed limit is configured in firmware config tool.
+
+			// app_set_wheel_max_speed_rpm(value);
+		}
+		else
+		{
+			return DISCARD;
+		}
+	#endif
 
 	return 5;
 }

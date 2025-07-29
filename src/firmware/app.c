@@ -250,6 +250,18 @@ void app_set_lights(bool on)
 	}
 }
 
+void app_set_speed_limit_operation_mode(uint16_t display_speed_limit_rpm)
+{
+	if (display_speed_limit_rpm == convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_SPORT_SWITCH_KPH))
+	{
+		app_set_operation_mode(OPERATION_MODE_SPORT);
+	}
+	else
+	{
+		app_set_operation_mode(OPERATION_MODE_DEFAULT);
+	}
+}
+
 void app_set_operation_mode(uint8_t mode)
 {
 	if (operation_mode != mode)
