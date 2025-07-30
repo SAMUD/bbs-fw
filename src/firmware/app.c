@@ -478,7 +478,7 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 
 bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 {
-	if ((assist_level_data.level.flags & ASSIST_FLAG_THROTTLE) && throttle_percent > 0 && throttle_ok())
+	if ((assist_level_data.level.flags & ASSIST_FLAG_THROTTLE) && assist_level_data.level.max_throttle_current_percent > 0 && throttle_percent > 0 && throttle_ok())
 	{
 		uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, THROTTLE_START_PERCENT, assist_level_data.level.max_throttle_current_percent);
 
