@@ -704,14 +704,13 @@ static void process_com_state_machine()
 
 uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph, bool display_scaled)
 {
-	uint16_t true_rpm = ((uint32_t)speed_kph * 100000UL + (WHEEL_CIRCUMFERENCE_MM * 6UL) / 2) / ((uint32_t)WHEEL_CIRCUMFERENCE_MM * 6UL);
+	uint16_t true_rpm = ((uint32_t)speed_kph * 100000UL) / ((uint32_t)WHEEL_CIRCUMFERENCE_MM * 6UL);
 
-	#ifdef DISPLAY_WHEEL_DIAMETER_INCH
+	#if (DISPLAY_WHEEL_DIAMETER_INCH > 0)
 		if (display_scaled)
 		{
 			return true_rpm * WHEEL_CIRCUMFERENCE_MM / (DISPLAY_WHEEL_DIAMETER_INCH * 25.4 * 3.1415f) + 0.5f;
 		}
-	#else
-		return true_rpm;
 	#endif
+	return true_rpm;
 }
