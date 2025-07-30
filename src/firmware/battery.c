@@ -114,32 +114,36 @@ void battery_init()
 
 void battery_process()
 {
-	if (!first_reading_done)
-	{
-		if (motor_get_battery_voltage_x10() > 0)
+	#ifdef BATTERY_NO_LOAD_DELAY_MS
+		if (!first_reading_done)
 		{
-			battery_percent = compute_battery_percent();
-			first_reading_done = true;
+			if (motor_get_battery_voltage_x10() > 0)
+			{
+				battery_percent = compute_battery_percent();
+				first_reading_done = true;
+			}
 		}
-	}
-	else
-	{
-		uint8_t target_current = motor_get_target_current();
+		else
+		{
+			uint8_t target_current = motor_get_target_current();
 
-		if (motor_disabled_at_ms == 0 && target_current == 0)
-		{
-			motor_disabled_at_ms = system_ms();
-		}
-		else if (target_current > 0)
-		{
-			motor_disabled_at_ms = 0;
-		}
+			if (motor_disabled_at_ms == 0 && target_current == 0)
+			{
+				motor_disabled_at_ms = system_ms();
+			}
+			else if (target_current > 0)
+			{
+				motor_disabled_at_ms = 0;
+			}
 
-		if (target_current == 0 && (system_ms() - motor_disabled_at_ms) > BATTERY_NO_LOAD_DELAY_MS)
-		{
-			battery_percent = compute_battery_percent();
+			if (target_current == 0 && (system_ms() - motor_disabled_at_ms) > BATTERY_NO_LOAD_DELAY_MS)
+			{
+				battery_percent = compute_battery_percent();
+			}
 		}
-	}
+	#else
+		battery_percent = compute_battery_percent();
+	#endif
 }
 
 uint8_t battery_get_percent()
