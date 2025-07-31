@@ -891,7 +891,7 @@ void reload_assist_params()
 	{
 		assist_level_data.level = assist_levels[operation_mode][assist_level];
 
-		assist_level_data.max_wheel_speed_rpm_x10 = ((int32_t)global_speed_limit_rpm * assist_level_data.level.max_speed_percent) / 10;
+		assist_level_data.max_wheel_speed_rpm_x10 = ((int32_t)convert_wheel_speed_kph_to_rpm(assist_level_data.level.max_speed_kph, false)) * 10;
 
 		if (assist_level_data.level.flags & ASSIST_FLAG_PAS)
 		{
@@ -909,7 +909,7 @@ void reload_assist_params()
 	{
 		assist_level_data.level.flags = 0;
 		assist_level_data.level.target_current_percent = 0;
-		assist_level_data.level.max_speed_percent = 0;
+		assist_level_data.level.max_speed_kph = 0;
 		assist_level_data.level.max_cadence_percent = 15;
 		assist_level_data.level.max_throttle_current_percent = 0;
 
