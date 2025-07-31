@@ -53,7 +53,7 @@ class PedalAssistLevel(BaseModel):
 	max_cadence_percent: int = Field(ge=0, le=100, default=0)
 	max_speed_percent: int = Field(ge=0, le=100, default=0)
 	max_throttle_current_percent: int = Field(ge=0, le=100, default=0)
-	target_current_percent: int = Field(ge=0, le=100, default=0)
+	target_power_watts: int = Field(ge=0, default=0)
 
 class PedalAssistLevelType(BaseModel):
     levels: list[PedalAssistLevel]

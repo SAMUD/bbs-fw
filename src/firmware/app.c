@@ -69,6 +69,7 @@ void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent);
 
 void apply_pretension(uint8_t* target_current);
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent);
+uint8_t calculate_current_for_power(uint16_t watts);
 bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent);
 bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool pas_engaged, bool throttle_override);
 bool apply_thermal_limit(uint8_t* target_current);
@@ -385,9 +386,10 @@ void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent)
 	{
 		if (pas_is_pedaling_forwards() && pas_get_pulse_counter() > PAS_START_DELAY_PULSES)
 		{
+			uint8_t level_target_current = calculate_current_for_power(assist_level_data.level.target_power_watts);
 			if (assist_level_data.level.flags & ASSIST_FLAG_PAS_VARIABLE)
 			{
-				uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, 0, assist_level_data.level.target_current_percent);
+				uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, 0, level_target_current);
 				if (current > *target_current)
 				{
 					*target_current = current;
@@ -395,14 +397,13 @@ void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent)
 			}
 			else
 			{
-				if (assist_level_data.level.target_current_percent > *target_current)
+				if (level_target_current > *target_current)
 				{
-					*target_current = assist_level_data.level.target_current_percent;
+					*target_current = level_target_current;
 				}
 
 				// apply "keep current" ramp
-				if (PAS_KEEP_CURRENT_PERCENT < 100)
-				{
+				#if (PAS_KEEP_CURRENT_PERCENT < 100)
 					if (*target_current > assist_level_data.keep_current_target_percent &&
 						pas_get_cadence_rpm_x10() > assist_level_data.keep_current_ramp_start_rpm_x10)
 					{
@@ -416,7 +417,7 @@ void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent)
 							*target_current,										// out_min
 							assist_level_data.keep_current_target_percent);			// out_max
 					}
-				}
+				#endif
 			}
 		}
 	}
@@ -468,12 +469,33 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 		}
 		else
 		{
-			if (assist_level_data.level.target_current_percent > *target_current)
+			uint8_t level_target_current = calculate_current_for_power(assist_level_data.level.target_power_watts);
+			if (level_target_current > *target_current)
 			{
-				*target_current = assist_level_data.level.target_current_percent;
+				*target_current = level_target_current;
 			}
 		}
 	}
+}
+
+// The motor expects current to be provided as a percentage of the max current,
+// So calculate the current in amps first before dividing it by the max
+uint8_t calculate_current_for_power(uint16_t watts)
+{
+	static uint32_t next_power_calculate_ms = 0;
+	static uint8_t power_current_percent = 0;
+	if (system_ms() >= next_power_calculate_ms)
+	{
+		next_power_calculate_ms = system_ms() + 100;
+		// We don't do anything to combat a feedback loop caused by voltage sag.
+		// The highest it will go in this case is 100%
+		power_current_percent = (watts / motor_get_battery_voltage_x10() * 1000) / MAX_CURRENT_AMPS;
+		if (power_current_percent > 100)
+		{
+			power_current_percent = 100;
+		}
+	}
+	return power_current_percent;
 }
 
 bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
@@ -592,7 +614,7 @@ bool apply_thermal_limit(uint8_t* target_current)
 	int16_t max_temp_x100 = MAX(temp_contr_x100, temp_motor_x100);
 	int8_t max_temp = MAX(temperature_contr_c, temperature_motor_c);
 
-	if (eventlog_is_enabled() && USE_TEMPERATURE_SENSOR && system_ms() > next_log_temp_ms)
+	if (eventlog_is_enabled() && USE_TEMPERATURE_SENSOR && system_ms() >= next_log_temp_ms)
 	{
 		next_log_temp_ms = system_ms() + 10000;
 		eventlog_write_data(EVT_DATA_TEMPERATURE, (uint16_t)temperature_motor_c << 8 | temperature_contr_c);
@@ -895,7 +917,7 @@ void reload_assist_params()
 
 		if (assist_level_data.level.flags & ASSIST_FLAG_PAS)
 		{
-			assist_level_data.keep_current_target_percent = (uint8_t)((uint16_t)PAS_KEEP_CURRENT_PERCENT * assist_level_data.level.target_current_percent / 100);
+			assist_level_data.keep_current_target_percent = (uint8_t)((uint16_t)PAS_KEEP_CURRENT_PERCENT * calculate_current_for_power(assist_level_data.level.target_power_watts) / 100);
 			assist_level_data.keep_current_ramp_start_rpm_x10 = PAS_KEEP_CURRENT_CADENCE_RPM * 10;
 			assist_level_data.keep_current_ramp_end_rpm_x10 = (uint16_t)(((uint32_t)assist_level_data.level.max_cadence_percent * MAX_CADENCE_RPM_X10) / 100);
 		}
@@ -908,7 +930,7 @@ void reload_assist_params()
 	else if (assist_level == ASSIST_PUSH && USE_PUSH_WALK)
 	{
 		assist_level_data.level.flags = 0;
-		assist_level_data.level.target_current_percent = 0;
+		assist_level_data.level.target_power_watts = 0;
 		assist_level_data.level.max_speed_kph = 0;
 		assist_level_data.level.max_cadence_percent = 15;
 		assist_level_data.level.max_throttle_current_percent = 0;
