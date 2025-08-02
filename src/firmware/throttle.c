@@ -25,15 +25,15 @@ static bool throttle_hard_ok;
 static uint32_t throttle_hard_limit_hit_at;
 
 
-//#define LOG_THROTTLE_ADC
+#define LOG_THROTTLE_ADC
 
 #define ADC_VOLTAGE_MV						5000ul
 
 #define THROTTLE_HARD_LOW_LIMIT_MV			500ul
 #define THROTTLE_HARD_HIGH_LIMIT_MV			4500ul
 
-#define THROTTLE_HARD_LOW_LIMIT_ADC			((THROTTLE_HARD_LOW_LIMIT_MV * 256) / ADC_VOLTAGE_MV)
-#define THROTTLE_HARD_HIGH_LIMIT_ADC		((THROTTLE_HARD_HIGH_LIMIT_MV * 256) / ADC_VOLTAGE_MV)
+#define THROTTLE_HARD_LOW_LIMIT_ADC			((THROTTLE_HARD_LOW_LIMIT_MV * 256) / ADC_VOLTAGE_MV) //25
+#define THROTTLE_HARD_HIGH_LIMIT_ADC		((THROTTLE_HARD_HIGH_LIMIT_MV * 256) / ADC_VOLTAGE_MV) //230
 #define THROTTLE_HARD_LIMIT_TOLERANCE_MS	100
 
 #if (THROTTLE_RESPONSE_CURVE == THROTTLE_RESPONSE_CUSTOM)
@@ -47,8 +47,8 @@ static const uint8_t throttle_custom_map_lut[101] =
 
 void throttle_init(uint16_t min_mv, uint16_t max_mv)
 {
-	min_voltage_adc = (uint8_t)(((uint32_t)min_mv * 256) / ADC_VOLTAGE_MV);
-	max_voltage_adc = (uint8_t)(((uint32_t)max_mv * 256) / ADC_VOLTAGE_MV);
+	min_voltage_adc = (uint8_t)(((uint32_t)min_mv * 256) / ADC_VOLTAGE_MV); //25 @500
+	max_voltage_adc = (uint8_t)(((uint32_t)max_mv * 256) / ADC_VOLTAGE_MV); //230 @4500
 	throttle_detected = false;
 	throttle_low_ok = false;
 	throttle_hard_ok = true;
@@ -66,14 +66,14 @@ uint8_t throttle_read()
 
 	int16_t value = adc_get_throttle();
 
-#ifdef LOG_THROTTLE_ADC
-	static uint8_t last_logged_throttle_adc = 0;	
-	if (ABS(value - last_logged_throttle_adc) > 1)
+	#ifdef LOG_THROTTLE_ADC
+	static uint8_t last_logged_throttle_adc = 0;
+	if (ABS(value - last_logged_throttle_adc) >= 1)
 	{
 		last_logged_throttle_adc = value;
-		eventlog_write_data(EVT_DATA_THROTTLE_ADC, value);		
+		eventlog_write_data(EVT_DATA_THROTTLE_ADC, value);
 	}
-#endif
+	#endif
 	
 	if (value < THROTTLE_HARD_LOW_LIMIT_ADC || value > THROTTLE_HARD_HIGH_LIMIT_ADC)
 	{
@@ -135,6 +135,15 @@ uint8_t throttle_read()
 	}
 
 	throttle_percent = (uint8_t)MAP16(value, min_voltage_adc, max_voltage_adc, 1, 100);
+
+//#ifdef LOG_THROTTLE_ADC
+//	static uint8_t last_logged_throttle_adc = 0;
+//	if (ABS(throttle_percent - last_logged_throttle_adc) >= 1)
+//	{
+//		last_logged_throttle_adc = throttle_percent;
+//		eventlog_write_data(EVT_DATA_THROTTLE_ADC, throttle_percent);
+//	}
+//#endif
 
 	return throttle_percent;
 }

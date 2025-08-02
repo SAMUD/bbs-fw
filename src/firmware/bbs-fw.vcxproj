@@ -60,6 +60,9 @@ make all TARGET_CONTROLLER=BBSHD</NMakeReBuildCommandLine>
     <NMakeIncludeSearchPath>C:/Program Files/SDCC/include;C:/Program Files/SDCC/include/mcs51;./</NMakeIncludeSearchPath>
     <OutDir>$(SolutionDir)</OutDir>
     <IntDir>build\$(Platform)\$(Configuration)\</IntDir>
+    <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
+    <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='TSDZ2|x64'">
     <NMakeBuildCommandLine>make all TARGET_CONTROLLER=TSDZ2</NMakeBuildCommandLine>

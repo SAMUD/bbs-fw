@@ -44,7 +44,10 @@ INCS = $(wildcard *.h $(foreach fd, $(SUBDIRS), $(fd)/*.h))
 SRCS = $(filter-out main.c, $(wildcard *.c $(foreach fd, $(SUBDIRS), $(fd)/*.c)))
 RELS := $(SRCS:.c=.rel)
 
-INC_DIRS = -I./ $(addprefix -I, $(SUBDIRS))
+##INC_DIRS = -I./ $(addprefix -I, $(SUBDIRS))
+# Add more include directories as needed
+INC_DIRS = -I./. $(addprefix -I, $(SUBDIRS))
+
 
 
 all: precheck $(TARGET) hex

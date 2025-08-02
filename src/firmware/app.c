@@ -649,6 +649,7 @@ bool apply_thermal_limit(uint8_t* target_current)
 	{
 		next_log_temp_ms = system_ms() + 10000;
 		eventlog_write_data(EVT_DATA_TEMPERATURE, (uint16_t)temperature_motor_c << 8 | temperature_contr_c);
+		//eventlog_write_data(EVT_DATA_TEMPERATURE, (uint16_t)throttle_read() << 8 | temperature_contr_c);
 	}
 
 	if (max_temp >= (MAX_TEMPERATURE - MAX_TEMPERATURE_RAMP_DOWN_INTERVAL))
