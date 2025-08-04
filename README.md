@@ -51,6 +51,8 @@ This project takes inspiration from [ESPHome](https://esphome.io/), where you pr
 
 As such, no pre-compiled binaries are provided. A command-line tool is WIP and will be provided in the future that will assist in compiling and flashing the controller based on a YAML configuration file. For now though, no documentation is yet provided - provide all configuration in `src/firmware/fwconfig.h`.
 
+Please note that **once flashed, there's no way back**. It's not possible to read the firmware from the controller to back it up, and the original firmware is not freely available on the internet. If you're lucky your supplier might be able to help you out, or try asking around on the Endless Sphere forums. Hopefully though, you won't ever want to go back :)
+
 bbsxtra is based on [bbs-fw](https://github.com/danielnilsson9/bbs-fw). If you would like a more "traditional" configuration tool and functionality that more closely matches the stock Bafang controller, go check out @danielnilsson9's excellent work. I wouldn't know where to begin on reverse engineering the controller, so this project would not be possible without them.
 
 ## Supported Hardware
