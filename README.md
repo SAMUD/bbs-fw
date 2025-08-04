@@ -72,7 +72,7 @@ V1.5     | IAP15W4K61S4 | ~2019       | V1.4 printed on PCB, sticker with 1.5.
 
 ### BBS02B
 This firmware is suspected to be incompatible with older BBS02 controllers.
-If you have a newer BBS02Bs work great, but if you have an older controller it might not be a good idea to flash this firmware.
+Newer BBS02Bs work great, but if you have an older controller it might not be a good idea to flash this firmware.
 
 Revision | MCU          | Released    | Comment
 -------- | ------------ | ----------- | --------------------
