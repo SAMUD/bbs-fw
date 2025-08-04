@@ -370,12 +370,12 @@ uint8_t app_get_temperature()
 void apply_pretension(uint8_t* target_current)
 {
 	#if USE_SPEED_SENSOR && USE_PRETENSION
-	uint16_t current_speed_rpm_x10 = speed_sensor_get_rpm_x10();
+		uint16_t current_speed_rpm_x10 = speed_sensor_get_rpm_x10();
 
-	if (current_speed_rpm_x10 > pretension_cutoff_speed_rpm_x10)
-	{
-		*target_current = 1;
-	}
+		if (current_speed_rpm_x10 > pretension_cutoff_speed_rpm_x10)
+		{
+			*target_current = 1;
+		}
 	#endif
 	return;
 }
@@ -403,7 +403,7 @@ void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent)
 				}
 
 				// apply "keep current" ramp
-				#if (PAS_KEEP_CURRENT_PERCENT < 100)
+				#if PAS_KEEP_CURRENT_PERCENT < 100
 					if (*target_current > assist_level_data.keep_current_target_percent &&
 						pas_get_cadence_rpm_x10() > assist_level_data.keep_current_ramp_start_rpm_x10)
 					{
@@ -493,12 +493,7 @@ uint8_t calculate_current_for_power(uint16_t watts)
 		{
 			// We don't do anything to combat a feedback loop caused by voltage sag.
 			// The highest it will go in this case is 100%
-			power_current_percent = (watts * 1000) / (voltage_x10 * MAX_CURRENT_AMPS);
-		}
-		// You can provide a higher wattage target than can be provided as the battery voltage drops, so cap it
-		if (power_current_percent > 100)
-		{
-			power_current_percent = 100;
+			power_current_percent = MIN(100, ((uint32_t)watts * 1000U) / ((uint32_t)voltage_x10 * MAX_CURRENT_AMPS));
 		}
 	}
 	return power_current_percent;
