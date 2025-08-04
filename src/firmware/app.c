@@ -482,14 +482,20 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 // So calculate the current in amps first before dividing it by the max
 uint8_t calculate_current_for_power(uint16_t watts)
 {
-	static uint32_t next_power_calculate_ms = 0;
+	static uint32_t next_power_calculate_ms = 250;
 	static uint8_t power_current_percent = 0;
 	if (system_ms() >= next_power_calculate_ms)
 	{
-		next_power_calculate_ms = system_ms() + 100;
-		// We don't do anything to combat a feedback loop caused by voltage sag.
-		// The highest it will go in this case is 100%
-		power_current_percent = (watts / motor_get_battery_voltage_x10() * 1000) / MAX_CURRENT_AMPS;
+		next_power_calculate_ms = system_ms() + 250;
+		uint16_t voltage_x10 = motor_get_battery_voltage_x10();
+		// If voltage reading is invalid don't modify the current percent
+		if (voltage_x10 > 0)
+		{
+			// We don't do anything to combat a feedback loop caused by voltage sag.
+			// The highest it will go in this case is 100%
+			power_current_percent = (watts * 1000) / (voltage_x10 * MAX_CURRENT_AMPS);
+		}
+		// You can provide a higher wattage target than can be provided as the battery voltage drops, so cap it
 		if (power_current_percent > 100)
 		{
 			power_current_percent = 100;
