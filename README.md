@@ -57,6 +57,12 @@ bbsxtra is based on [bbs-fw](https://github.com/danielnilsson9/bbs-fw). If you w
 
 bbs-fw has been tested on the BBSHD, and I own a (newer) BBS02B 750W. The controllers are similar so it should work great on both, however bbsxtra is only tested on the BBS02B.
 
+This firmware specifically supports the UART type of Bafang motor. Bafang is now only producing these motors with CAN-bus controllers. These controllers are completely different, and are also completely locked down. If you're looking to build a new bike with this firmware in 2025, you have 3 options:
+
+1. ($) These motors have been produced since 2017 so check the second-hand market, they're reliable and easy to service,
+2. ($$) Find an old stock UART motor still being sold,
+3. ($$$) Purchase a CAN-bus motor, then source a UART controller and all accessories (the screen etc is not compatible). Replace the controller on the motor. *I've not tried this, it's at your own risk.*
+
 ### BBSHD
 
 Revision | MCU          | Released    | Comment
@@ -65,8 +71,8 @@ V1.4     | STC15W4K56S4 | ~2017       | V1.3 printed on PCB, sticker with 1.4.
 V1.5     | IAP15W4K61S4 | ~2019       | V1.4 printed on PCB, sticker with 1.5.
 
 ### BBS02B
-There are compatibility issues reported, this firmware is suspected to be incompatible with older BBS02 controllers.
-If you have a newer BBS02B you are probably fine, if you have an older controller it might not be a good idea to flash this firmware.
+This firmware is suspected to be incompatible with older BBS02 controllers.
+If you have a newer BBS02Bs work great, but if you have an older controller it might not be a good idea to flash this firmware.
 
 Revision | MCU          | Released    | Comment
 -------- | ------------ | ----------- | --------------------
