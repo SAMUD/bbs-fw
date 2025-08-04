@@ -6,7 +6,7 @@ This firmware is intended to replace the original Bafang firmware on the BBSHD/B
 
 This firmware is mostly compatible with all displays & accessories that works with the original Bafang firmware. It will not work with anything that attempts to modify the configuration of the controller.
 
-⚠️ Warning: The firmware should NOT be flashed or configured while the eBike battery is charging!
+bbsxtra is based on [bbs-fw](https://github.com/danielnilsson9/bbs-fw). If you would like a more "traditional" configuration tool and functionality that more closely matches the stock Bafang controller, go check out @danielnilsson9's excellent work. I wouldn't know where to begin on reverse engineering the controller, so this project would not be possible without them.
 
 ## Major features of bbsxtra
 
@@ -53,7 +53,7 @@ As such, no pre-compiled binaries are provided. A command-line tool is WIP and w
 
 Please note that **once flashed, there's no way back**. It's not possible to read the firmware from the controller to back it up, and the original firmware is not freely available on the internet. If you're lucky your supplier might be able to help you out, or try asking around on the Endless Sphere forums. Hopefully though, you won't ever want to go back :)
 
-bbsxtra is based on [bbs-fw](https://github.com/danielnilsson9/bbs-fw). If you would like a more "traditional" configuration tool and functionality that more closely matches the stock Bafang controller, go check out @danielnilsson9's excellent work. I wouldn't know where to begin on reverse engineering the controller, so this project would not be possible without them.
+⚠️ Warning: The firmware should NOT be flashed or configured while the eBike battery is charging!
 
 ## Supported Hardware
 
