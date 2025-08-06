@@ -234,11 +234,10 @@
 // Eggrider compatibility. When the display sets the speed limit
 // to a certain value, use sport mode. The actual speed limit of the motor
 // remains unchanged. This is a workaround; it is not possible to
-// program the controller using an Eggrider as it doesn't understand the
-// bbs-fw protocol. App configuration:
+// program the controller using an Eggrider as bbsxtra does not have a
+// UART configuration interface. App configuration:
 // - Set "Bafang switch mode" to "Only live data"
-// - Make sure the bbs-fw wheel diameter in inches matches the Eggrider
-//   wheel circumference in mm.
+// - Make sure WHEEL_CIRCUMFERENCE_MM matches the Eggrider wheel circumference.
 // - Set "Max speed OffRoad" to the value set below.
 // #define SPEED_LIMIT_SPORT_SWITCH_KPH 		45 // speed in km/h.
 

@@ -10,7 +10,7 @@ bbsxtra is based on [bbs-fw](https://github.com/danielnilsson9/bbs-fw). If you w
 
 ## Major features of bbsxtra
 
-- **Per assist level power in Watts:** provide the same level of power no matter the battery level by compensating for the voltage drop as the battery depletes.
+- **Define power in watts instead of amps:** provide the same level of power no matter the battery level by compensating for the voltage drop as the battery depletes.
 - **Per assist level speed limit in km/h:** more accurately set the speed limit in absolute units instead of percentage
 - **Partial Eggrider support:** supports the road/offroad switch in Eggrider, using the integrated standard/sport mode of bbsxtra.
 - **More accurate speed sensing:** specify wheel circumference in mm along with the diameter in inches set on the display. The firmware compensates for the difference and shows the more accurate speed.
