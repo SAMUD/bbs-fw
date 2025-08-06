@@ -727,7 +727,7 @@ static int16_t process_bafang_display_write_speed_limit()
 		return KEEP;
 	}
 
-	#if (SPEED_LIMIT_SPORT_SWITCH_KPH > 0)
+	#ifdef SPEED_LIMIT_SPORT_SWITCH_KPH
 		if (compute_checksum(msgbuf, 4) == msgbuf[4])
 		{
 			uint16_t value = ((msgbuf[2] << 8) | msgbuf[3]);

@@ -54,7 +54,7 @@ typedef struct
 	uint8_t flags;
 	uint8_t max_cadence_percent;
 	uint8_t max_speed_kph;
-	uint8_t max_throttle_current_percent;
+	uint16_t max_throttle_power_watts;
 	uint16_t target_power_watts;
 
 }  assist_level_t;

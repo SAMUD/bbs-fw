@@ -259,6 +259,7 @@ void app_set_lights(bool on)
 	}
 }
 
+#ifdef SPEED_LIMIT_SPORT_SWITCH_KPH
 void app_set_speed_limit_operation_mode(uint16_t display_speed_limit_rpm)
 {
 	if (display_speed_limit_rpm == convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_SPORT_SWITCH_KPH, true))
@@ -270,6 +271,7 @@ void app_set_speed_limit_operation_mode(uint16_t display_speed_limit_rpm)
 		app_set_operation_mode(OPERATION_MODE_DEFAULT);
 	}
 }
+#endif
 
 void app_set_operation_mode(uint8_t mode)
 {
@@ -286,8 +288,7 @@ void app_set_wheel_max_speed_rpm(uint16_t value)
 	if (global_speed_limit_rpm != value)
 	{
 		global_speed_limit_rpm = value;
-		global_throttle_speed_limit_rpm_x10 = ((int32_t)global_speed_limit_rpm *
-			THROTTLE_GLOBAL_SPD_LIM_PERCENT) / 10;
+		global_throttle_speed_limit_rpm_x10 = (int32_t)convert_wheel_speed_kph_to_rpm(THROTTLE_GLOBAL_SPD_LIM_KPH, false) * 10;
 
 		eventlog_write_data(EVT_DATA_WHEEL_SPEED_PPM, value);
 		reload_assist_params();
@@ -478,32 +479,11 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 	}
 }
 
-// The motor expects current to be provided as a percentage of the max current,
-// So calculate the current in amps first before dividing it by the max
-uint8_t calculate_current_for_power(uint16_t watts)
-{
-	static uint32_t next_power_calculate_ms = 250;
-	static uint8_t power_current_percent = 0;
-	if (system_ms() >= next_power_calculate_ms)
-	{
-		next_power_calculate_ms = system_ms() + 250;
-		uint16_t voltage_x10 = motor_get_battery_voltage_x10();
-		// If voltage reading is invalid don't modify the current percent
-		if (voltage_x10 > 0)
-		{
-			// We don't do anything to combat a feedback loop caused by voltage sag.
-			// The highest it will go in this case is 100%
-			power_current_percent = MIN(100, ((uint32_t)watts * 1000U) / ((uint32_t)voltage_x10 * MAX_CURRENT_AMPS));
-		}
-	}
-	return power_current_percent;
-}
-
 bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 {
-	if ((assist_level_data.level.flags & ASSIST_FLAG_THROTTLE) && assist_level_data.level.max_throttle_current_percent > 0 && throttle_percent > 0 && throttle_ok())
+	if ((assist_level_data.level.flags & ASSIST_FLAG_THROTTLE) && assist_level_data.level.max_throttle_power_watts > 0 && throttle_percent > 0 && throttle_ok())
 	{
-		uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, THROTTLE_START_PERCENT, assist_level_data.level.max_throttle_current_percent);
+		uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, THROTTLE_START_PERCENT, calculate_current_for_power(assist_level_data.level.max_throttle_power_watts));
 
 		if (current >= *target_current)
 		{
@@ -515,6 +495,21 @@ bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 	return false;
 }
 
+// The motor expects current to be provided as a percentage of the max current,
+// So calculate the current in amps first before dividing it by the max
+uint8_t calculate_current_for_power(uint16_t watts)
+{
+	static uint8_t power_current_percent = 0;
+	uint16_t voltage_x10 = motor_get_battery_voltage_x10();
+	if (voltage_x10 > 0) {
+		// We don't do anything to combat a feedback loop caused by voltage sag.
+		// The highest it will go in this case is 100%
+		power_current_percent = MIN(100, (((uint32_t)watts + 25U) * 1000U) /
+			((uint32_t)voltage_x10 * MAX_CURRENT_AMPS));
+		// 25 watts added as an arbitrary extra as actual wattage reading was coming in a little low
+	}
+	return power_current_percent;
+}
 
 bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool pas_engaged, bool throttle_override)
 {
@@ -525,7 +520,7 @@ bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool p
 		bool global_throttle_limit_active =
 			!pas_engaged &&
 			throttle_percent > 0 &&
-			THROTTLE_GLOBAL_SPD_LIM_PERCENT > 0 &&
+			THROTTLE_GLOBAL_SPD_LIM_KPH > 0 &&
 			(
 				THROTTLE_GLOBAL_SPD_LIM_OPT == THROTTLE_GLOBAL_SPEED_LIMIT_ENABLED ||
 				(THROTTLE_GLOBAL_SPD_LIM_OPT == THROTTLE_GLOBAL_SPEED_LIMIT_STD_LVLS && operation_mode == OPERATION_MODE_DEFAULT)
@@ -934,7 +929,7 @@ void reload_assist_params()
 		assist_level_data.level.target_power_watts = 0;
 		assist_level_data.level.max_speed_kph = 0;
 		assist_level_data.level.max_cadence_percent = 15;
-		assist_level_data.level.max_throttle_current_percent = 0;
+		assist_level_data.level.max_throttle_power_watts = 0;
 
 		assist_level_data.max_wheel_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(WALK_MODE_SPEED_KPH, false) * 10;
 	}
