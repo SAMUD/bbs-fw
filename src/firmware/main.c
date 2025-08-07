@@ -80,6 +80,6 @@ void main(void)
 			app_process();
 		}
 
-		watchdog_yeild();
+		watchdog_yield();
 	}
 }
