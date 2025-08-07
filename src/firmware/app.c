@@ -26,7 +26,8 @@ typedef struct
 	// ---------------------------------
 
 	// speed
-	int32_t max_wheel_speed_rpm_x10;
+	int32_t max_pas_wheel_speed_rpm_x10;
+	int32_t max_throttle_wheel_speed_rpm_x10;
 
 	// pas
 	uint8_t keep_current_target_percent;
@@ -71,7 +72,7 @@ void apply_pretension(uint8_t* target_current);
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent);
 uint8_t calculate_current_for_power(uint16_t watts);
 bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent);
-bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool pas_engaged, bool throttle_override);
+bool apply_speed_limit(uint8_t* target_current, bool throttle_override);
 bool apply_thermal_limit(uint8_t* target_current);
 bool apply_low_voltage_limit(uint8_t* target_current);
 bool apply_shift_sensor_interrupt(uint8_t* target_current);
@@ -121,7 +122,6 @@ void app_init()
 	cruise_paused = true;
 	operation_mode = OPERATION_MODE_DEFAULT;
 
-	app_set_wheel_max_speed_rpm(convert_wheel_speed_kph_to_rpm(MAX_SPEED_KPH, false));
 	app_set_assist_level(ASSIST_STARTUP_LEVEL);
 	reload_assist_params();
 
@@ -170,7 +170,7 @@ void app_process()
 		}
 	}
 
-	bool speed_limiting = apply_speed_limit(&target_current, throttle_percent, pas_engaged, throttle_override);
+	bool speed_limiting = apply_speed_limit(&target_current, throttle_override);
 	bool thermal_limiting = apply_thermal_limit(&target_current);
 	bool lvc_limiting = apply_low_voltage_limit(&target_current);
 	bool shift_limiting =
@@ -279,18 +279,6 @@ void app_set_operation_mode(uint8_t mode)
 	{
 		operation_mode = mode;
 		eventlog_write_data(EVT_DATA_OPERATION_MODE, operation_mode);
-		reload_assist_params();
-	}
-}
-
-void app_set_wheel_max_speed_rpm(uint16_t value)
-{
-	if (global_speed_limit_rpm != value)
-	{
-		global_speed_limit_rpm = value;
-		global_throttle_speed_limit_rpm_x10 = (int32_t)convert_wheel_speed_kph_to_rpm(THROTTLE_GLOBAL_SPD_LIM_KPH, false) * 10;
-
-		eventlog_write_data(EVT_DATA_WHEEL_SPEED_PPM, value);
 		reload_assist_params();
 	}
 }
@@ -504,48 +492,19 @@ uint8_t calculate_current_for_power(uint16_t watts)
 	if (voltage_x10 > 0) {
 		// We don't do anything to combat a feedback loop caused by voltage sag.
 		// The highest it will go in this case is 100%
-		power_current_percent = MIN(100, (((uint32_t)watts + 25U) * 1000U) /
+		power_current_percent = MIN(100, ((uint32_t)watts * 1000U) /
 			((uint32_t)voltage_x10 * MAX_CURRENT_AMPS));
-		// 25 watts added as an arbitrary extra as actual wattage reading was coming in a little low
 	}
 	return power_current_percent;
 }
 
-bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool pas_engaged, bool throttle_override)
+bool apply_speed_limit(uint8_t* target_current, bool throttle_override)
 {
 	static bool speed_limiting = false;
 
 	#if USE_SPEED_SENSOR
-		// global throttle speed limit applies if enabled in configuration, PAS is not engaged and throttle is used
-		bool global_throttle_limit_active =
-			!pas_engaged &&
-			throttle_percent > 0 &&
-			THROTTLE_GLOBAL_SPD_LIM_KPH > 0 &&
-			(
-				THROTTLE_GLOBAL_SPD_LIM_OPT == THROTTLE_GLOBAL_SPEED_LIMIT_ENABLED ||
-				(THROTTLE_GLOBAL_SPD_LIM_OPT == THROTTLE_GLOBAL_SPEED_LIMIT_STD_LVLS && operation_mode == OPERATION_MODE_DEFAULT)
-			);
-
-		bool throttle_speed_override_active = !global_throttle_limit_active && throttle_override &&
-			(assist_level_data.level.flags & ASSIST_FLAG_PAS) &&
-			(assist_level_data.level.flags & ASSIST_FLAG_OVERRIDE_SPEED);
-
-		int32_t max_speed_rpm_x10;
-		if (global_throttle_limit_active)
-		{
-			// use configured global throttle override speed limit
-			max_speed_rpm_x10 = global_throttle_speed_limit_rpm_x10;
-		}
-		else if (throttle_speed_override_active)
-		{
-			// override assist level speed limit to global speed limit
-			max_speed_rpm_x10 = global_speed_limit_rpm * 10;
-		}
-		else
-		{
-			// normal operation, use configured assist level speed limit
-			max_speed_rpm_x10 = assist_level_data.max_wheel_speed_rpm_x10;
-		}
+		int32_t max_speed_rpm_x10 = throttle_override ?
+			assist_level_data.max_throttle_wheel_speed_rpm_x10 : assist_level_data.max_pas_wheel_speed_rpm_x10;
 
 		int32_t max_speed_ramp_low_rpm_x10 = max_speed_rpm_x10 - speed_limit_ramp_interval_rpm_x10;
 		int32_t max_speed_ramp_high_rpm_x10 = max_speed_rpm_x10 + speed_limit_ramp_interval_rpm_x10;
@@ -909,7 +868,9 @@ void reload_assist_params()
 	{
 		assist_level_data.level = assist_levels[operation_mode][assist_level];
 
-		assist_level_data.max_wheel_speed_rpm_x10 = ((int32_t)convert_wheel_speed_kph_to_rpm(assist_level_data.level.max_speed_kph, false)) * 10;
+		assist_level_data.max_pas_wheel_speed_rpm_x10 = ((int32_t)convert_wheel_speed_kph_to_rpm(assist_level_data.level.max_pas_speed_kph, false)) * 10;
+		assist_level_data.max_throttle_wheel_speed_rpm_x10 = ((int32_t)convert_wheel_speed_kph_to_rpm(assist_level_data.level.max_throttle_speed_kph, false)) * 10;
+		eventlog_write_data(EVT_DATA_WHEEL_SPEED_PPM, assist_level_data.max_pas_wheel_speed_rpm_x10);
 
 		if (assist_level_data.level.flags & ASSIST_FLAG_PAS)
 		{
@@ -926,11 +887,12 @@ void reload_assist_params()
 	else if (assist_level == ASSIST_PUSH && USE_PUSH_WALK)
 	{
 		assist_level_data.level.flags = 0;
-		assist_level_data.level.target_power_watts = 0;
-		assist_level_data.level.max_speed_kph = 0;
 		assist_level_data.level.max_cadence_percent = 15;
+		assist_level_data.level.max_pas_speed_kph = 0;
+		assist_level_data.level.target_power_watts = 0;
+		assist_level_data.level.max_throttle_speed_kph = 0;
 		assist_level_data.level.max_throttle_power_watts = 0;
 
-		assist_level_data.max_wheel_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(WALK_MODE_SPEED_KPH, false) * 10;
+		assist_level_data.max_pas_wheel_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(WALK_MODE_SPEED_KPH, false) * 10;
 	}
 }

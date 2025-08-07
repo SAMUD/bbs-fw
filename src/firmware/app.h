@@ -60,7 +60,6 @@ void app_set_assist_level(uint8_t level);
 void app_set_lights(bool on);
 
 void app_set_operation_mode(uint8_t mode);
-void app_set_wheel_max_speed_rpm(uint16_t value);
 void app_set_speed_limit_operation_mode(uint16_t display_speed_limit_rpm);
 
 uint8_t app_get_assist_level();

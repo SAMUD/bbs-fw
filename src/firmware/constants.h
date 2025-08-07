@@ -10,7 +10,6 @@
 #define ASSIST_FLAG_CRUISE				0x04
 #define ASSIST_FLAG_PAS_VARIABLE		0x08	// pas mode using throttle to set power level
 #define ASSIST_FLAG_OVERRIDE_CADENCE	0x20	// pas option where max cadence is set to 100% when throttle overrides pas
-#define ASSIST_FLAG_OVERRIDE_SPEED		0x40	// pas option where max speed is set to 100% when throttle overrides pas
 
 #define ASSIST_MODE_SELECT_OFF			0x00
 #define ASSIST_MODE_SELECT_STANDARD		0x01
@@ -53,9 +52,10 @@ typedef struct
 {
 	uint8_t flags;
 	uint8_t max_cadence_percent;
-	uint8_t max_speed_kph;
-	uint16_t max_throttle_power_watts;
+	uint8_t max_pas_speed_kph;
 	uint16_t target_power_watts;
+	uint8_t max_throttle_speed_kph;
+	uint16_t max_throttle_power_watts;
 
 }  assist_level_t;
 
