@@ -163,7 +163,8 @@ void app_process()
 
 		// override target cadence if configured in assist level
 		if (throttle_override &&
-			(assist_level_data.level.flags & ASSIST_FLAG_PAS) &&
+			assist_level_data.level.target_power_watts > 0 &&
+			assist_level_data.level.max_pas_speed_kph > 0 &&
 			(assist_level_data.level.flags & ASSIST_FLAG_OVERRIDE_CADENCE))
 		{
 			target_cadence = THROTTLE_CADENCE_OVERRIDE_PERCENT;
@@ -371,7 +372,7 @@ void apply_pretension(uint8_t* target_current)
 
 void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent)
 {
-	if (assist_level_data.level.flags & ASSIST_FLAG_PAS)
+	if (assist_level_data.level.target_power_watts > 0 && assist_level_data.level.max_pas_speed_kph > 0)
 	{
 		if (pas_is_pedaling_forwards() && pas_get_pulse_counter() > PAS_START_DELAY_PULSES)
 		{
@@ -469,7 +470,7 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 
 bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 {
-	if ((assist_level_data.level.flags & ASSIST_FLAG_THROTTLE) && assist_level_data.level.max_throttle_power_watts > 0 && throttle_percent > 0 && throttle_ok())
+	if (assist_level_data.level.max_throttle_power_watts > 0 && assist_level_data.level.max_throttle_speed_kph > 0 && throttle_percent > 0 && throttle_ok())
 	{
 		uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, THROTTLE_START_PERCENT, calculate_current_for_power(assist_level_data.level.max_throttle_power_watts));
 
@@ -872,7 +873,7 @@ void reload_assist_params()
 		assist_level_data.max_throttle_wheel_speed_rpm_x10 = ((int32_t)convert_wheel_speed_kph_to_rpm(assist_level_data.level.max_throttle_speed_kph, false)) * 10;
 		eventlog_write_data(EVT_DATA_WHEEL_SPEED_PPM, assist_level_data.max_pas_wheel_speed_rpm_x10);
 
-		if (assist_level_data.level.flags & ASSIST_FLAG_PAS)
+		if (assist_level_data.level.target_power_watts > 0 && assist_level_data.level.max_pas_speed_kph > 0)
 		{
 			assist_level_data.keep_current_target_percent = (uint8_t)((uint16_t)PAS_KEEP_CURRENT_PERCENT * calculate_current_for_power(assist_level_data.level.target_power_watts) / 100);
 			assist_level_data.keep_current_ramp_start_rpm_x10 = PAS_KEEP_CURRENT_CADENCE_RPM * 10;

@@ -49,7 +49,7 @@ class Lights(BaseModel):
     mode: Literal["default", "always_on", "brake_light"]
 
 class PedalAssistLevel(BaseModel):
-	flags: str = Field(default="ASSIST_FLAG_PAS | ASSIST_FLAG_THROTTLE")
+	flags: str = Field(default="ASSIST_FLAG_NONE")
 	max_cadence_percent: int = Field(ge=0, le=100, default=0)
 	max_speed_percent: int = Field(ge=0, le=100, default=0)
 	max_throttle_current_percent: int = Field(ge=0, le=100, default=0)

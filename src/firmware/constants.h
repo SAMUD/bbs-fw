@@ -5,8 +5,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define ASSIST_FLAG_PAS					0x01
-#define ASSIST_FLAG_THROTTLE			0x02
+#define ASSIST_FLAG_NONE				0x00
 #define ASSIST_FLAG_CRUISE				0x04
 #define ASSIST_FLAG_PAS_VARIABLE		0x08	// pas mode using throttle to set power level
 #define ASSIST_FLAG_OVERRIDE_CADENCE	0x20	// pas option where max cadence is set to 100% when throttle overrides pas

@@ -85,19 +85,19 @@ lights:
 pedal_assist_levels:
   standard:
     levels:
-      - flags: ASSIST_FLAG_PAS | ASSIST_FLAG_THROTTLE
+      - flags: ASSIST_FLAG_NONE
         max_cadence_percent: 100
         max_speed_percent: 0
         max_throttle_current_percent: 0
         target_power_watts: 0
-      - flags: ASSIST_FLAG_PAS | ASSIST_FLAG_THROTTLE
+      - flags: ASSIST_FLAG_NONE
         max_cadence_percent: 100
         max_speed_percent: 0
         max_throttle_current_percent: 0
         target_power_watts: 0
   sport:
     levels:
-      - flags: ASSIST_FLAG_PAS | ASSIST_FLAG_THROTTLE
+      - flags: ASSIST_FLAG_NONE
         max_cadence_percent: 100
         max_speed_percent: 0
         max_throttle_current_percent: 0
