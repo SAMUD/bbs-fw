@@ -214,7 +214,7 @@
 #define BATTERY_PERCENT_MAP						BATTERY_PERCENT_MAP_NONE
 
 // Time with no motor load until battery voltage is updated to avoid voltage sag.
-#define BATTERY_NO_LOAD_DELAY_MS				2000
+#define BATTERY_NO_LOAD_DELAY_MS				1000
 
 // Padding values for voltage range of battery.
 #define BATTERY_FULL_OFFSET_PERCENT				8
